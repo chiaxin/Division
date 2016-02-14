@@ -28,7 +28,7 @@ And highlight options, such as format, compression..etc
 
 Press visible or AllLayers to execute process
 
-Image Name = <PSD_NAME><INTERVAL><GROUP_NAME><VERSION>.<FORMAT>
+Image Name = [PSD_NAME][INTERVAL][GROUP_NAME][VERSION].[FORMAT]
 
 Example :
 
