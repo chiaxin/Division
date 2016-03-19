@@ -4,3 +4,7 @@ ver 1.0.8 : Sep, 17, 2014
 ver 1.1.0 : Feb, 14, 2016
     1. Refine script be more elegant.
     2. Rename some text informations.
+
+ver 1.1.1 : Mar, 18, 2016
+    1. Remove immediacy method.
+    2. Script restructure in variablies
