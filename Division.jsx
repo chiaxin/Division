@@ -9,7 +9,7 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version :: 1.1.1
+//    Version :: 1.1.2
 //
 //    Last update :: Mar, 19, 2016
 //
@@ -24,7 +24,7 @@ var EXTENSIONCASE           = Extension.LOWERCASE   ; //file extension toppercas
 var SAVE_PATHS              = getSavePathProc()     ; //Getting all need to save path(s).
 var SAVE_PATH               = SAVE_PATHS[0]         ; //
 var UI_TITLE                = "Division by Chiaxin" ; //Option window title.
-var SCRIPT_VER              = "1.1.1"               ; //
+var SCRIPT_VER              = "1.1.2"               ; //
 var TREAT_ALL               = true                  ; //For immediately execute, save images treatment mode.
 var ENDING_WAIT             = 240                   ; //
 //var IMMEDIATE               = false                 ; //Immediately execute switch. default is false
@@ -776,7 +776,7 @@ function isIncludedGrayscale(channel)
 function progressRateBar(max)
 {
     this.isClosed = false;
-    var properties = { maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false );
+    var properties = { maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false };
     this.pr = new Window("window", TEXT_PROCTITLE, undefined, properties);
     this.pr.orientation = "column";
     this.pr.plane = this.pr.add("panel");

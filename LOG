@@ -8,3 +8,6 @@ ver 1.1.0 : Feb, 14, 2016
 ver 1.1.1 : Mar, 18, 2016
     1. Remove immediacy method.
     2. Script restructure in variablies
+
+ver 1.1.2 : Mar, 20, 2016
+    1. Fix wrong of syntax
