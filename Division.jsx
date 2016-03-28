@@ -9,9 +9,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version :: 1.1.2
+//    Version :: 1.1.3
 //
-//    Last update :: Mar, 19, 2016
+//    Last update :: Mar, 28, 2016
 //
 //    Test and Debug : 
 //    [ os ] Microsoft windows 7 x64
@@ -24,7 +24,7 @@ var EXTENSIONCASE           = Extension.LOWERCASE   ; //file extension toppercas
 var SAVE_PATHS              = getSavePathProc()     ; //Getting all need to save path(s).
 var SAVE_PATH               = SAVE_PATHS[0]         ; //
 var UI_TITLE                = "Division by Chiaxin" ; //Option window title.
-var SCRIPT_VER              = "1.1.2"               ; //
+var SCRIPT_VER              = "1.1.3"               ; //
 var TREAT_ALL               = true                  ; //For immediately execute, save images treatment mode.
 var ENDING_WAIT             = 240                   ; //
 //var IMMEDIATE               = false                 ; //Immediately execute switch. default is false
@@ -62,6 +62,8 @@ var gResizeMode     = 1;        //Image resize mode, 1:original, 2:half, 3:quad.
 var gOverlapping    = true;     //Overlapping or not.
 var gLaunchLowres   = false;    //
 var gExtensionStore = "tga";    //
+
+var gProcessBreak   = false;
 
 // GUI text-info defined :
 var TEXT_PATHS      = "path(s)",
@@ -504,11 +506,16 @@ function divisionMainProc(outputMode)
             rate.plus(1);
         }
         delete fileBuff;
+
+        if( gProcessBreak ) {
+            alert( "Process has been terminated", UI_TITLE );
+            break;
+        }
     }
     // Recover original layerSet visible status.
     setLayerSetsVisibilities( curDoc, visibleLayerSets );
     // Tell user how many images save successfully, then close rate window.
-    if( !rate.isClosed )
+    if( !gProcessBreak )
     {
         var result_report = numberOfSuccess + TEXT_COMPLETED;
         if( gGrayKeyword != "" && curDoc.mode!=DocumentMode.GRAYSCALE ) {
@@ -775,9 +782,10 @@ function isIncludedGrayscale(channel)
 
 function progressRateBar(max)
 {
-    this.isClosed = false;
+    //this.isClosed = false;
     var properties = { maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false };
     this.pr = new Window("window", TEXT_PROCTITLE, undefined, properties);
+    this.pr.active = true;
     this.pr.orientation = "column";
     this.pr.plane = this.pr.add("panel");
     this.pr.plane.size = { width:280, height:120 };
@@ -791,7 +799,16 @@ function progressRateBar(max)
     //this.pr.plane.checkds.value = IMMEDIATE;
 
     // Event
-    this.pr.plane.rate.onClose = function(){ this.isClosed = true; };
+    //this.pr.plane.rate.onClose = function(){ this.isClosed = true; };
+    //this.pr.onClose = function(){ this.isClosed = true; };
+    this.pr.onClose = function(){ 
+        //alert( "Close!" );
+        gProcessBreak = true;
+        //this.isClosed = true; 
+        //alert(this.isClosed);
+        //return;
+    };
+
 
     // If 'No dialog next time' is checked, 
     // return true, otherwise return false.    
