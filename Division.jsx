@@ -27,7 +27,6 @@ var UI_TITLE                = "Division by Chiaxin" ; //Option window title.
 var SCRIPT_VER              = "1.1.3"               ; //
 var TREAT_ALL               = true                  ; //For immediately execute, save images treatment mode.
 var ENDING_WAIT             = 240                   ; //
-//var IMMEDIATE               = false                 ; //Immediately execute switch. default is false
 
 // Lowres Variablies
 var LOWRES_SUFFIX           = ".lowres"             ; //
