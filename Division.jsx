@@ -48,7 +48,7 @@ var JPEG_MATTE_TYPE         = MatteType.SEMIGRAY    ; // JPEG matte type.
 // TGA Format
 var TGA_PER_PIXELS = TargaBitsPerPixels.TWENTYFOUR  ; // TGA format (24 bits).
 
-// The log file would be pre-reading, If not exists, it will try to bulid a new file.
+// The log file would be pre-reading, If not exists, it will try to build a new file.
 var SCRIPT_NAME     = "Division.jsx"                        ; // The local script name.
 var LOG_NAME        = "DivisionLog.txt"                     ; // The log txt.
 var SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script folder.
