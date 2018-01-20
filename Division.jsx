@@ -33,20 +33,20 @@ var SCRIPT_VER              = "v1.2.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
-var LOWRES_SUFFIX           = ".lowres"             ; // Low Resolution name suffix.
-var LOWRES_RATIO            = 4                     ; // How many ratio to reduce? 
+var LOW_SUFFIX              = ".low"                ; // Low Resolution name suffix.
+var LOW_RATIO               = 4                     ; // How many ratio to reduce? 
 
 // TIFF Format
-var TIFF_BYTEODER        = ByteOrder.IBM            ; //TIFF format byte order.
-var TIFFCOMPRESSENCODING = TIFFEncoding.TIFFLZW     ; //TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
+var TIFF_BYTE_ORDER         = ByteOrder.IBM         ; //TIFF format byte order.
+var TIFF_COMP_ENCODING      = TIFFEncoding.TIFFLZW  ; //TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
 
 // JPEG Format
 var JPEG_FORMAT = FormatOptions.STANDARDBASELINE    ; // JPEG format.
-var JPEGSAVEQUALITY         = 12                    ; // JPEG compression quality.
-var JPEG_MATTETYPE          = MatteType.SEMIGRAY    ; // JPEG matte type.
+var JPEG_SAVE_QUALITY       = 12                    ; // JPEG compression quality.
+var JPEG_MATTE_TYPE         = MatteType.SEMIGRAY    ; // JPEG matte type.
 
 // TGA Format
-var TGA_PERPIXELS = TargaBitsPerPixels.TWENTYFOUR   ; // TGA format (24 bits).
+var TGA_PER_PIXELS = TargaBitsPerPixels.TWENTYFOUR  ; // TGA format (24 bits).
 
 // The log file would be pre-reading, If not exists, it will try to bulid a new file.
 var SCRIPT_NAME     = "Division.jsx"                        ; // The local script name.
@@ -64,7 +64,7 @@ var gIntervalSymbol = "_";      // Indicate the interval symbol, underscore or d
 var gExtension      = "tga";    // Image save extension.
 var gResizeMode     = 1;        // Image resize mode, 1:original, 2:half, 3:quad.
 var gOverlapping    = true;     // Overlapping file or not.
-var gLaunchLowres   = false;    // Do generate low resolution image or not.
+var gLaunchLow      = false;    // Do generate low resolution image or not.
 var gExtensionStore = "tga";    //
 var gProcessBreak   = false;    //
 var gDisableOutside = false;    // When save, disable outside layer at first.
@@ -74,51 +74,51 @@ var TEXT_PATHS      = "path(s)",
     TEXT_FORMAT     = "Format",
     TEXT_COMPRESS   = "Compress",
     TEXT_RESIZE     = "Resize",
-    TEXT_ORGSIZE    = "Original",
-    TEXT_HALFSIZE   = "Half",
-    TEXT_QUADSIZE   = "Quarter",
-    TEXT_LOWRES     = "With Low",
-    TEXT_DOLOWRES   = "Building low-res image...",
-    TEXT_LOWRESDONE = "The low-res image is done!",
+    TEXT_ORG_SIZE   = "Original",
+    TEXT_HALF_SIZE  = "Half",
+    TEXT_QUARTER_SIZE = "Quarter",
+    TEXT_WITH_LOW   = "With Low",
+    TEXT_BUILD_LOW  = "Building low-res image...",
+    TEXT_LOW_DONE   = "The low-res image is done!",
     TEXT_OVERLAPPING= "Overlapping",
     TEXT_OVERRIDE   = "Override",
-    TEXT_IGNOREE    = "Ignore Exists",
-    TEXT_NEWFILE    = "Saving a new image...",
+    TEXT_IGNORE_EXISTS = "Ignore Exists",
+    TEXT_NEW_FILE   = "Saving a new image...",
     TEXT_INTERVAL   = "Intervals",
     TEXT_UNDERSCORE = "Underscore",
-    TEXT_DISOUTSIDE = "Dis Outside",
+    TEXT_DISABLE_OUTSIDE = "Dis Outside",
     TEXT_DOT        = "Dot",
     TEXT_VERSION    = "Suffixes || Gray Keywords",
     TEXT_EXECUTE    = "Executions",
-    TEXT_EXEVIS     = "Visible",
-    TEXT_EXEALL     = "All Groups",
+    TEXT_EXECUTE_VISIBLE = "Visible",
+    TEXT_EXECUTE_ALL = "All Groups",
     TEXT_CANCEL     = "Cancel",
     TEXT_ADVANCE    = "Advance",
-    TEXT_PROCTITLE  = "Processing...",
-    TEXT_SAPATH     = "Same as this document",
-    TEXT_NOTLAYER   = "Error: This document haven't any layer-set.",
+    TEXT_PROCESSING = "Processing...",
+    TEXT_SAME_AS    = "Same as this document",
+    TEXT_NO_LAYER   = "Error: This document haven't any layer-set.",
     TEXT_START      = "Process start...",
-    TEXT_FEXISTS    = "File exists...Skip.",
-    TEXT_FOVERRIDE  = "File exists...Overriding.",
-    TEXT_GROUPEMPTY = "is empty...Skip",
-    TEXT_DORESIZE   = "Image Resize...",
+    TEXT_FILE_EXISTS = "File exists...Skip.",
+    TEXT_DO_OVERRIDE = "File exists...Overriding.",
+    TEXT_EMPTY_SKIP = "is empty...Skip",
+    TEXT_DO_RESIZE  = "Image Resize...",
     TEXT_COMPLETED  = " image(s) saved,",
-    TEXT_INVAILDNAME= " invaild, Ignore.",
-    TEXT_OVEREIGHT  = "TIFF format only, Because file is not 8 bits",
+    TEXT_INVALID_NAME = " invalid, Ignore.",
+    TEXT_TIFF_ONLY  = "TIFF format only, Because file is not 8 bits",
     TEXT_ANALYSIS   = "Grayscale Analysis...",
-    TEXT_DOGRAYSCALE= "Gray conversion is done!",
-    TEXT_GRAYSKIP   = "Skip Gray",
-    TEXT_GRAYINFO   = "image(s) Grayscale.",
-    TEXT_PARENTS    = "[ ",
-    TEXT_PARENTE    = " ] ",
-    TEXT_NOVISIBLE  = "Do \"Visible\" must have one group visible at least!",
-    TEXT_ISNOTPSD   = "This document is not a PSD file!",
-    HELP_SAVEPATH   = "Please choice a path of list you want to save.",
+    TEXT_DO_GRAY    = "Gray conversion is done!",
+    TEXT_SKIP_GRAY  = "Skip Gray",
+    TEXT_GRAY_INFO  = "image(s) Grayscale.",
+    TEXT_PARENT_START = "[ ",
+    TEXT_PARENT_END = " ] ",
+    TEXT_NO_ANY_VISIBLE = "Do \"Visible\" must have one group visible at least!",
+    TEXT_IS_NOT_PSD = "This document is not a PSD file!",
+    HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
     HELP_EXTENSION  = "Image format selections, TIF, TGA or JPG",
-    HELP_RESIAZE    = "Resize image after saving.",
+    HELP_RESIZE     = "Resize image after saving.",
     HELP_OVERLAPPING= "Overlapping exists file or skip.",
     HELP_INTERVAL   = "Specific interval symbol between main and channel name.",
-    HELP_VAGK       = "Append version string, fill grayscale keywords",
+    HELP_SUFFIXES   = "Suffixes and convert grayscale keywords.",
     HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers";
 
 // Main process execute
@@ -151,7 +151,9 @@ function divisionDialog()
     var kDialogProperties = {
         maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false
     };
-    var dlg = new Window("dialog", UI_TITLE + " " + SCRIPT_VER, undefined, kDialogProperties);
+    var dlg = new Window(
+        "dialog", UI_TITLE + " " + SCRIPT_VER, undefined, kDialogProperties
+    );
     Window.onClose = function() { delete dlg };
 
     // Panel display all path(s) ready to save.
@@ -163,7 +165,7 @@ function divisionDialog()
     // And if we provide multi path, it will show drop-down-list UI for choose.
     if( SAVE_PATHS.length == 1 && SAVE_PATHS[0] == app.activeDocument.path.fsName ) {
         dlg.panelSavePaths.stA = dlg.panelSavePaths.add("StaticText", undefined);
-        dlg.panelSavePaths.stA.text = TEXT_SAPATH;
+        dlg.panelSavePaths.stA.text = TEXT_SAME_AS;
         SAVE_PATH = SAVE_PATHS[0];
     } else {
         dlg.panelSavePaths.ddlA = dlg.panelSavePaths.add("DropDownList", undefined);
@@ -172,7 +174,7 @@ function divisionDialog()
             dlg.panelSavePaths.ddlA.add( "item", SAVE_PATHS[i] );
         }
         dlg.panelSavePaths.text = i + " " + TEXT_PATHS;
-        dlg.panelSavePaths.ddlA.helpTip = HELP_SAVEPATH;
+        dlg.panelSavePaths.ddlA.helpTip = HELP_SAVE_PATH;
         dlg.panelSavePaths.ddlA.selection = 0;
         dlg.panelSavePaths.ddlA.onChange = function() {
             SAVE_PATH = dlg.panelSavePaths.ddlA.selection.text;
@@ -190,9 +192,15 @@ function divisionDialog()
     // else if document is 16 or 32 bits/channel, show TIFF format only.
     // (because tga and jpeg is not supported).
     if(app.activeDocument.bitsPerChannel == BitsPerChannelType.EIGHT) {
-        dlg.panelExtensionOptions.rbA = dlg.panelExtensionOptions.add("RadioButton", undefined, "TIF");
-        dlg.panelExtensionOptions.rbB = dlg.panelExtensionOptions.add("RadioButton", undefined, "TGA");
-        dlg.panelExtensionOptions.rbC = dlg.panelExtensionOptions.add("RadioButton", undefined, "JPG");
+        dlg.panelExtensionOptions.rbA = dlg.panelExtensionOptions.add(
+            "RadioButton", undefined, "TIF"
+        );
+        dlg.panelExtensionOptions.rbB = dlg.panelExtensionOptions.add(
+            "RadioButton", undefined, "TGA"
+        );
+        dlg.panelExtensionOptions.rbC = dlg.panelExtensionOptions.add(
+            "RadioButton", undefined, "JPG"
+        );
         switch(gExtension)
         {
         case "tif":
@@ -218,20 +226,28 @@ function divisionDialog()
         };
         gExtensionStore = gExtension;
     } else {
-        dlg.panelExtensionOptions.stA = dlg.panelExtensionOptions.add("StaticText", undefined, TEXT_OVEREIGHT);
+        dlg.panelExtensionOptions.stA = dlg.panelExtensionOptions.add(
+            "StaticText", undefined, TEXT_TIFF_ONLY
+        );
         gExtensionStore = gExtension;
         gExtension = "tif";
     }
 
     // Panel resize image options.
-    dlg.panelResizeOptions              = dlg.add("panel", undefined, TEXT_RESIZE);
-    dlg.panelResizeOptions.helpTip      = HELP_RESIAZE;
-    dlg.panelResizeOptions.size         = kGlobalPanelSize;
-    dlg.panelResizeOptions.alignChild   = "left";
-    dlg.panelResizeOptions.orientation  = "row";
-    dlg.panelResizeOptions.rbA          = dlg.panelResizeOptions.add("RadioButton", undefined, TEXT_ORGSIZE);
-    dlg.panelResizeOptions.rbB          = dlg.panelResizeOptions.add("RadioButton", undefined, TEXT_HALFSIZE);
-    dlg.panelResizeOptions.rbC          = dlg.panelResizeOptions.add("RadioButton", undefined, TEXT_QUADSIZE);
+    dlg.panelResizeOptions = dlg.add("panel", undefined, TEXT_RESIZE);
+    dlg.panelResizeOptions.helpTip = HELP_RESIZE;
+    dlg.panelResizeOptions.size = kGlobalPanelSize;
+    dlg.panelResizeOptions.alignChild = "left";
+    dlg.panelResizeOptions.orientation = "row";
+    dlg.panelResizeOptions.rbA = dlg.panelResizeOptions.add(
+        "RadioButton", undefined, TEXT_ORG_SIZE
+    );
+    dlg.panelResizeOptions.rbB = dlg.panelResizeOptions.add(
+        "RadioButton", undefined, TEXT_HALF_SIZE
+    );
+    dlg.panelResizeOptions.rbC = dlg.panelResizeOptions.add(
+        "RadioButton", undefined, TEXT_QUARTER_SIZE
+    );
     switch(gResizeMode)
     {
     case 1:
@@ -249,13 +265,17 @@ function divisionDialog()
     dlg.panelResizeOptions.rbC.onClick  = function(){ gResizeMode = 3; };
 
     // Panel overlapping method options.
-    dlg.panelOverlappingOptions             = dlg.add("panel", undefined, TEXT_OVERLAPPING);
-    dlg.panelOverlappingOptions.helpTip     = HELP_OVERLAPPING;
-    dlg.panelOverlappingOptions.size        = kGlobalPanelSize;
-    dlg.panelOverlappingOptions.alignChild  = "left";
+    dlg.panelOverlappingOptions = dlg.add("panel", undefined, TEXT_OVERLAPPING);
+    dlg.panelOverlappingOptions.helpTip = HELP_OVERLAPPING;
+    dlg.panelOverlappingOptions.size = kGlobalPanelSize;
+    dlg.panelOverlappingOptions.alignChild = "left";
     dlg.panelOverlappingOptions.orientation = "row";
-    dlg.panelOverlappingOptions.rbA         = dlg.panelOverlappingOptions.add("RadioButton", undefined, TEXT_OVERRIDE);
-    dlg.panelOverlappingOptions.rbB         = dlg.panelOverlappingOptions.add("RadioButton", undefined, TEXT_IGNOREE);
+    dlg.panelOverlappingOptions.rbA = dlg.panelOverlappingOptions.add(
+        "RadioButton", undefined, TEXT_OVERRIDE
+    );
+    dlg.panelOverlappingOptions.rbB = dlg.panelOverlappingOptions.add(
+        "RadioButton", undefined, TEXT_IGNORE_EXISTS
+    );
     dlg.panelOverlappingOptions.rbA.value   = true;
     dlg.panelOverlappingOptions.rbA.onClick = function(){ gOverlapping = true; };
     dlg.panelOverlappingOptions.rbB.onClick = function(){ gOverlapping = false; };
@@ -266,8 +286,12 @@ function divisionDialog()
     dlg.panelIntervalOptions.size       = kGlobalPanelSize;
     dlg.panelIntervalOptions.alignChild = "center";
     dlg.panelIntervalOptions.orientation= "row";
-    dlg.panelIntervalOptions.rbA = dlg.panelIntervalOptions.add("RadioButton", undefined, TEXT_UNDERSCORE);
-    dlg.panelIntervalOptions.rbB = dlg.panelIntervalOptions.add("RadioButton", undefined, TEXT_DOT);
+    dlg.panelIntervalOptions.rbA = dlg.panelIntervalOptions.add(
+        "RadioButton", undefined, TEXT_UNDERSCORE
+    );
+    dlg.panelIntervalOptions.rbB = dlg.panelIntervalOptions.add(
+        "RadioButton", undefined, TEXT_DOT
+    );
     if(gIntervalSymbol==".") {
         dlg.panelIntervalOptions.rbB.value = true;
     } else {
@@ -282,9 +306,13 @@ function divisionDialog()
     dlg.panelVersionOptions.size        = kGlobalPanelSize;
     dlg.panelVersionOptions.alignChild  = "center";
     dlg.panelVersionOptions.orientation = "row";
-    dlg.panelVersionOptions.etA = dlg.panelVersionOptions.add("EditText", undefined, gVersionAppend);
+    dlg.panelVersionOptions.etA = dlg.panelVersionOptions.add(
+        "EditText", undefined, gVersionAppend
+    );
     dlg.panelVersionOptions.etA.preferredSize = kGlobalEditTextSize;
-    dlg.panelVersionOptions.etB = dlg.panelVersionOptions.add("EditText", undefined, gGrayKeyword);
+    dlg.panelVersionOptions.etB = dlg.panelVersionOptions.add(
+        "EditText", undefined, gGrayKeyword
+    );
     dlg.panelVersionOptions.etB.preferredSize = kGlobalEditTextSize2;
     dlg.panelVersionOptions.etA.onChange = function() {
         if(isValidName(dlg.panelVersionOptions.etA.text)) {
@@ -294,7 +322,7 @@ function divisionDialog()
         }
     };
     dlg.panelVersionOptions.etB.onChange = function() {
-        if(isValdName(dlg.panelVersionOptions.etB.text)) {
+        if(isValidName(dlg.panelVersionOptions.etB.text)) {
             gGrayKeyword = dlg.panelVersionOptions.etB.text;
         } else {
             dlg.panelVersionOptions.etA.text = "";
@@ -307,8 +335,8 @@ function divisionDialog()
     dlg.panelExecution.size         = kGlobalPanelSize;
     dlg.panelExecution.alignChild   = "center";
     dlg.panelExecution.orientation  = "row";
-    dlg.panelExecution.btnA         = dlg.panelExecution.add("Button", undefined, TEXT_EXEVIS);
-    dlg.panelExecution.btnB         = dlg.panelExecution.add("Button", undefined, TEXT_EXEALL);
+    dlg.panelExecution.btnA         = dlg.panelExecution.add("Button", undefined, TEXT_EXECUTE_VISIBLE);
+    dlg.panelExecution.btnB         = dlg.panelExecution.add("Button", undefined, TEXT_EXECUTE_ALL);
     dlg.panelExecution.btnC         = dlg.panelExecution.add("Button", undefined, TEXT_CANCEL);
     dlg.panelExecution.btnA.size    = kGlobalButtonSize;
     dlg.panelExecution.btnB.size    = kGlobalButtonSize;
@@ -318,15 +346,15 @@ function divisionDialog()
     dlg.panelAdvanceOptions.size        = kGlobalPanelSize;
     dlg.panelAdvanceOptions.alignChild  = "left";
     dlg.panelAdvanceOptions.orientation = "row";
-    dlg.panelAdvanceOptions.cbA         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_DISOUTSIDE);
+    dlg.panelAdvanceOptions.cbA         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_DISABLE_OUTSIDE);
     dlg.panelAdvanceOptions.cbA.value   = gDisableOutside;
     dlg.panelAdvanceOptions.cbB         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_COMPRESS);
     dlg.panelAdvanceOptions.cbB.value   = gCompression;
-    dlg.panelAdvanceOptions.cbC         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_LOWRES);
-    dlg.panelAdvanceOptions.cbC.value   = gLaunchLowres;
+    dlg.panelAdvanceOptions.cbC         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_WITH_LOW);
+    dlg.panelAdvanceOptions.cbC.value   = gLaunchLow;
     dlg.panelAdvanceOptions.cbA.onClick = function(){ gDisableOutside = !gDisableOutside; };
     dlg.panelAdvanceOptions.cbB.onClick = function(){ gCompression = !gCompression; };
-    dlg.panelAdvanceOptions.cbC.onClick = function(){ gLaunchLowres = !gLaunchLowres; }; 
+    dlg.panelAdvanceOptions.cbC.onClick = function(){ gLaunchLow = !gLaunchLow; }; 
 
     // Execute button onClick - Visible layer-set(s) only.
     dlg.panelExecution.btnA.onClick = function () {
@@ -389,16 +417,16 @@ function divisionMainProc(outputMode)
     var visibleLayerSets = getLayerSetVisible(curDoc);
     var visibleLayers = getLayerVisible(curDoc);
 
-    // If do visible layer-sets only with zero visibility, warning and quit.
+    // If do visible layer-sets only with all invisible, warning and quit.
     if( !gNumVisible && !outputMode ) {
-        alert( TEXT_NOVISIBLE, UI_TITLE + SCRIPT_VER );
+        alert( TEXT_NO_ANY_VISIBLE, UI_TITLE + SCRIPT_VER );
         return false;
     }
 
     var rate_multi = 1;
     if( gResizeMode != 1 ) rate_multi += 1;
     if( gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE ) rate_multi += 1;
-    if( gLaunchLowres ) rate_multi += 1;
+    if( gLaunchLow ) rate_multi += 1;
 
     // If output mode is true ( all output ) rate max is number of layer-sets.
     // else it will be number of visible layer-sets.
@@ -423,13 +451,15 @@ function divisionMainProc(outputMode)
     for( i = 0 ; i < curDoc.layerSets.length ; i++ ) {
         var channel_name = curDoc.layerSets[i].name + gVersionAppend;
         if( !isValidName( channel_name ) ) {
-            rate.setInfo( channel_name + " " + TEXT_INVAILDNAME );
+            rate.setInfo( channel_name + " " + TEXT_INVALID_NAME );
             rate.plus( rate_multi );
             continue;
         } else if( !visibleLayerSets[i] && !outputMode ) {
             continue;
         } else if( !curDoc.layerSets[i].artLayers.length ) {
-            rate.setInfo( TEXT_PARENTS + curDoc.layerSets[i].name + TEXT_PARENTE + TEXT_GROUPEMPTY );
+            rate.setInfo(
+                TEXT_PARENT_START + curDoc.layerSets[i].name + TEXT_PARENT_END + TEXT_EMPTY_SKIP 
+            );
             rate.plus(rate_multi);
             continue;
         }
@@ -440,7 +470,7 @@ function divisionMainProc(outputMode)
         }
 
         // Prepare file path
-        rate.setInfo( TEXT_PARENTS + channel_name + TEXT_PARENTE );
+        rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END );
         var fileBuff = new File(
             SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + "." + gExtension
         );
@@ -448,13 +478,13 @@ function divisionMainProc(outputMode)
         //If gOverlapping is off and file exists.skip it.
         //Otherwise override it, create new one if not exists.
         if( fileBuff.exists && gOverlapping == false ) {
-            rate.setInfo(TEXT_FEXISTS);
+            rate.setInfo(TEXT_FILE_EXISTS);
             rate.plus(rate_multi);
             continue;
         } else if( fileBuff.exists ) {
-            rate.setInfo( TEXT_FOVERRIDE );
+            rate.setInfo( TEXT_DO_OVERRIDE );
         } else {
-            rate.setInfo( TEXT_NEWFILE );
+            rate.setInfo( TEXT_NEW_FILE );
         }
 
         // Try to save image if any unexception error occur, quit this process.
@@ -466,13 +496,13 @@ function divisionMainProc(outputMode)
             delete fileBuff, rate;
             return false;
         }
-        numberOfSuccess++; //Success number plus one.
+        numberOfSuccess++; // When success the number plus one.
 
         var openType = getOpenOptions(gExtension);
 
         //If resize value is 2 or 3 (half and Quad)
         if( gResizeMode != 1 ) {
-            rate.setInfo( TEXT_PARENTS + channel_name + TEXT_PARENTE + TEXT_DORESIZE );
+            rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END + TEXT_DO_RESIZE );
             try {
                 var workDoc = app.open( fileBuff, openType ); //Open new document.
                 app.activeDocument = workDoc; //Setting work document active.
@@ -503,35 +533,35 @@ function divisionMainProc(outputMode)
                     alert(e, UI_TITLE+SCRIPT_VER);
                 }
                 app.activeDocument = curDoc;
-                rate.setInfo(TEXT_DOGRAYSCALE);
+                rate.setInfo(TEXT_DO_GRAY);
             } else {
-                rate.setInfo( TEXT_GRAYSKIP );
+                rate.setInfo( TEXT_SKIP_GRAY );
             }
             rate.plus(1);
         }
 
         // Generate low resolution image after save.
-        if( gLaunchLowres )
+        if( gLaunchLow )
         {
-            rate.setInfo(channel_name + " -> " + TEXT_DOLOWRES);
-            lowresFile = new File(
+            rate.setInfo(channel_name + " -> " + TEXT_BUILD_LOW);
+            low_res_file = new File(
                 SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + 
-                LOWRES_SUFFIX + "." + gExtension
+                LOW_SUFFIX + "." + gExtension
             );
-            var lowresWidth = Math.floor( resizeWidth / LOWRES_RATIO );
-            var lowresHeight= Math.floor( resizeHeight/ LOWRES_RATIO );
+            var low_res_width = Math.floor( resizeWidth / LOW_RATIO );
+            var low_res_height= Math.floor( resizeHeight/ LOW_RATIO );
             var workDoc = app.open( fileBuff, openType );
             app.activeDocument = workDoc;
             try {
-                workDoc.resizeImage( lowresWidth, lowresHeight, gImagePixel );
-                workDoc.saveAs( lowresFile, saveOption, false, EXTENSION_CASE );
+                workDoc.resizeImage( low_res_width, low_res_height, gImagePixel );
+                workDoc.saveAs( low_res_file, saveOption, false, EXTENSION_CASE );
                 workDoc.close( SaveOptions.DONOTSAVECHANGES );
             } catch(e) {
                 alert(e, UI_TITLE + " " + SCRIPT_VER );
             }
-            rate.setInfo( channel_name + " -> " + TEXT_LOWRESDONE );
-            app.activeDocment = curDoc;
-            delete lowresFile;
+            rate.setInfo( channel_name + " -> " + TEXT_LOW_DONE );
+            app.activeDocument = curDoc;
+            delete low_res_file;
             rate.plus(1);
         }
         delete fileBuff;
@@ -554,7 +584,7 @@ function divisionMainProc(outputMode)
     {
         var result_report = numberOfSuccess + TEXT_COMPLETED;
         if( gGrayKeyword != "" && curDoc.mode!=DocumentMode.GRAYSCALE ) {
-            result_report += (", " + numberOfGrayscale + TEXT_GRAYINFO);
+            result_report += (", " + numberOfGrayscale + TEXT_GRAY_INFO);
         }
         rate.setInfo( result_report );
         $.sleep(ENDING_WAIT);
@@ -576,7 +606,7 @@ function activeDocumentCheck()
     }
     if (curDoc.name.split(".").pop().toLowerCase() != "psd")
     {
-        alert(TEXT_ISNOTPSD, UI_TITLE+SCRIPT_VER);
+        alert(TEXT_IS_NOT_PSD, UI_TITLE+SCRIPT_VER);
         return false;
     } 
     try {
@@ -587,7 +617,7 @@ function activeDocumentCheck()
     }
     if (curDoc.layerSets.length == 0)
     {
-        alert(TEXT_NOTLAYER, UI_TITLE+SCRIPT_VER);
+        alert(TEXT_NO_LAYER, UI_TITLE+SCRIPT_VER);
         return false;
     }
     return true;
@@ -660,11 +690,11 @@ function readingLog()
             else
                 gCompression = true;
             break;
-        case "extra_lowres":
+        case "with_low_res":
             if (value=="true" || value=="1")
-                gLaunchLowres = true;
+                gLaunchLow = true;
             else
-                gLaunchLowres = false;
+                gLaunchLow = false;
         case "interval_symbol":
             if (value=="_" || value==".")
                 gIntervalSymbol = value;
@@ -713,7 +743,7 @@ function writeLog()
             log.writeln("images_extension = " + gExtensionStore);
         else
             log.writeln("images_extension = " + gExtension);
-        log.writeln("extra_lowres = " + gLaunchLowres);
+        log.writeln("with_low_res = " + gLaunchLow);
         log.writeln("images_compression = " + gCompression);
         log.writeln("interval_symbol = " + gIntervalSymbol);
         log.writeln("version_operate = " + gVersionAppend);
@@ -774,11 +804,11 @@ function getSaveOptions(extension)
     case "tif":
         var saveOptions = TiffSaveOptions;
         saveOptions.alphaChannels = ALPHA_CHANNEL_KEEP;
-        saveOptions.byteOrder = TIFF_BYTEODER;
+        saveOptions.byteOrder = TIFF_BYTE_ORDER;
         saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
         saveOptions.layers = false;
         if(gCompression)
-            saveOptions.imageCompression = TIFFCOMPRESSENCODING;
+            saveOptions.imageCompression = TIFF_COMP_ENCODING;
         else
             saveOptions.imageCompression = TIFFEncoding.NONE;
         break;
@@ -786,15 +816,15 @@ function getSaveOptions(extension)
         var saveOptions = TargaSaveOptions;
         saveOptions.alphaChannels  = ALPHA_CHANNEL_KEEP;
         saveOptions.embedColorProfile = COLOR_PROFILE_EMBED;
-        saveOptions.resolution = TGA_PERPIXELS;
+        saveOptions.resolution = TGA_PER_PIXELS;
         saveOptions.rleCOMPRESS_DEFAULT = gCompression;
         break;
     case "jpg":
         var saveOptions = JPEGSaveOptions;
         saveOptions.alphaChannels = ALPHA_CHANNEL_KEEP;
         saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
-        saveOptions.matte = JPEG_MATTETYPE;
-        saveOptions.quality = JPEGSAVEQUALITY;
+        saveOptions.matte = JPEG_MATTE_TYPE;
+        saveOptions.quality = JPEG_SAVE_QUALITY;
         saveOptions.scans = JPEG_FORMAT;
         break;
     }
@@ -822,8 +852,8 @@ function getOpenOptions(extension)
 
 function isValidName(name)
 {
-    var invaildWords = new RegExp("[\\/:\"\*\?<>|]+");
-    return (!invaildWords.test(name));
+    var invalidWords = new RegExp("[\\/:\"\*\?<>|]+");
+    return (!invalidWords.test(name));
 }
 
 function isIncludedGrayscale(channel)
@@ -840,7 +870,7 @@ function isIncludedGrayscale(channel)
 function progressRateBar(max)
 {
     var properties = { maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false };
-    this.pr = new Window("window", TEXT_PROCTITLE, undefined, properties);
+    this.pr = new Window("window", TEXT_PROCESSING, undefined, properties);
     this.pr.active = true;
     this.pr.orientation = "column";
     this.pr.plane = this.pr.add("panel");
