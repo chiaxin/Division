@@ -15,16 +15,16 @@
 
 ## How to use
 
-+ Please place a text present path you want to save
++ Create a "text layer" and key the full path you want to save
 + If no path or directory is not exists, It would save path be same as PSD file
 + Press "visible" or "All Layers" button to process
-+ Final image name rule</br><PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
++ Final image name rule is </br><PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
 
 ## Limit
 
 + PSD file need saved.
 + Layer-Set(group) at least have one layer, otherwise would be ignore.
-+ If color-depth is not 8bits, Just TIFF format only
++ If color-depth is not 8bits, Just TIFF format can be export only
 
 ## Photoshop Support
 
