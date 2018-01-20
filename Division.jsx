@@ -24,8 +24,8 @@
 // ----------------------------------------------------------------------------
 //
 var COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
-var ALPHACHANNELKEEP        = false                 ; // The Alpha channel keep or not.
-var EXTENSIONCASE           = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
+var ALPHA_CHANNEL_KEEP      = false                 ; // The Alpha channel keep or not.
+var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
 var SAVE_PATHS              = getSavePathProc()     ; // Get all path(s) need to save.
 var SAVE_PATH               = SAVE_PATHS[0]         ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
@@ -57,8 +57,8 @@ var SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script fold
 var gImagePixel     = 72;       // Document's pixel. The default is 72.
 var gCompression    = true;     // Compression image option.
 var gGrayKeyword    = "";       // The keyword(s) define gray image.
-var gNumVisible   = 0;        //
-var gLayNumVisiblies= 0;        //
+var gNumVisible     = 0;        //
+var gLayNumVisible  = 0;        //
 var gVersionAppend  = "";       // Indicate the version string suffix.
 var gIntervalSymbol = "_";      // Indicate the interval symbol, underscore or dot.
 var gExtension      = "tga";    // Image save extension.
@@ -76,7 +76,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_RESIZE     = "Resize",
     TEXT_ORGSIZE    = "Original",
     TEXT_HALFSIZE   = "Half",
-    TEXT_QUADSIZE   = "Quater",
+    TEXT_QUADSIZE   = "Quarter",
     TEXT_LOWRES     = "With Low",
     TEXT_DOLOWRES   = "Building low-res image...",
     TEXT_LOWRESDONE = "The low-res image is done!",
@@ -106,7 +106,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_INVAILDNAME= " invaild, Ignore.",
     TEXT_OVEREIGHT  = "TIFF format only, Because file is not 8 bits",
     TEXT_ANALYSIS   = "Grayscale Analysis...",
-    TEXT_DOGRAYSCALE= "Gray convertion is done!",
+    TEXT_DOGRAYSCALE= "Gray conversion is done!",
     TEXT_GRAYSKIP   = "Skip Gray",
     TEXT_GRAYINFO   = "image(s) Grayscale.",
     TEXT_PARENTS    = "[ ",
@@ -422,7 +422,7 @@ function divisionMainProc(outputMode)
     // Loop saving each layerSet(s)
     for( i = 0 ; i < curDoc.layerSets.length ; i++ ) {
         var channel_name = curDoc.layerSets[i].name + gVersionAppend;
-        if( !isVaildName( channel_name ) ) {
+        if( !isValidName( channel_name ) ) {
             rate.setInfo( channel_name + " " + TEXT_INVAILDNAME );
             rate.plus( rate_multi );
             continue;
@@ -434,7 +434,7 @@ function divisionMainProc(outputMode)
             continue;
         }
 
-        // Switch off all layerSets visiable without currect layerSet index(i)
+        // Switch off all layerSets visible without current layerSet index(i)
         for( j = 0 ; j < curDoc.layerSets.length ; j++ ) {
             curDoc.layerSets[j].visible = ( j == i );
         }
@@ -459,7 +459,7 @@ function divisionMainProc(outputMode)
 
         // Try to save image if any unexception error occur, quit this process.
         try {
-            curDoc.saveAs(fileBuff, saveOption, true, EXTENSIONCASE);    //Saving image.
+            curDoc.saveAs(fileBuff, saveOption, true, EXTENSION_CASE);    //Saving image.
             rate.plus(1);
         } catch(e) {
             alert( e, UI_TITLE + " " + SCRIPT_VER );
@@ -524,7 +524,7 @@ function divisionMainProc(outputMode)
             app.activeDocument = workDoc;
             try {
                 workDoc.resizeImage( lowresWidth, lowresHeight, gImagePixel );
-                workDoc.saveAs( lowresFile, saveOption, false, EXTENSIONCASE );
+                workDoc.saveAs( lowresFile, saveOption, false, EXTENSION_CASE );
                 workDoc.close( SaveOptions.DONOTSAVECHANGES );
             } catch(e) {
                 alert(e, UI_TITLE + " " + SCRIPT_VER );
@@ -542,11 +542,11 @@ function divisionMainProc(outputMode)
         }
     }
     // Recover original layerSet visible status.
-    setLayerSetsVisibilities( curDoc, visibleLayerSets );
+    setLayerSetVisible( curDoc, visibleLayerSets );
 
     if (gDisableOutside)
     {
-        setLayerVisibilities(curDoc, visibleLayers);
+        setLayerVisible(curDoc, visibleLayers);
     }
 
     // Tell user how many images save successfully, then close rate window.
@@ -604,7 +604,7 @@ function getSavePathProc()
     // Loop for search text-layers
     for(i=0 ; i<docLayers.length ; i++)
     {
-        // Reset pathIsDuplicated nnotation
+        // Reset pathIsDuplicated notation
         pathIsDuplicated = false;
         if(docLayers[i].kind == LayerKind.TEXT)
         {
@@ -672,13 +672,13 @@ function readingLog()
                 gIntervalSymbol = "_";
             break;
         case "version_operate":
-            if (isVaildName(value))
+            if (isValidName(value))
                 gVersionAppend = value;
             else
                 gVersionAppend = "";
             break;
         case "grayscale_keywords":
-            if (isVaildName(value))
+            if (isValidName(value))
                 gGrayKeyword = value;
             else
                 gGrayKeyword = "";
@@ -742,16 +742,16 @@ function getLayerSetVisible(workDoc)
 
 function getLayerVisible(workDoc)
 {
-    gLayNumVisiblies = 0;
+    gLayNumVisible = 0;
     var visibleLayers = [];
     for ( i=0 ; i < workDoc.layers.length ; i++ ) {
         visibleLayers.push(workDoc.layers[i].visible);
-        if (visibleLayers[i]) gLayNumVisiblies++;
+        if (visibleLayers[i]) gLayNumVisible++;
     }
     return visibleLayers;
 }
 
-function setLayerSetsVisibilities(workDoc, visible)
+function setLayerSetVisible(workDoc, visible)
 {
     for ( i = 0 ; i < workDoc.layerSets.length ; i++)
     {
@@ -759,7 +759,7 @@ function setLayerSetsVisibilities(workDoc, visible)
     }
 }
 
-function setLayerVisibilities(workDoc, visible)
+function setLayerVisible(workDoc, visible)
 {
     for (i=0 ; i<workDoc.layers.length ; i++)
     {
@@ -773,7 +773,7 @@ function getSaveOptions(extension)
     {
     case "tif":
         var saveOptions = TiffSaveOptions;
-        saveOptions.alphaChannels = ALPHACHANNELKEEP;
+        saveOptions.alphaChannels = ALPHA_CHANNEL_KEEP;
         saveOptions.byteOrder = TIFF_BYTEODER;
         saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
         saveOptions.layers = false;
@@ -784,14 +784,14 @@ function getSaveOptions(extension)
         break;
     case "tga":
         var saveOptions = TargaSaveOptions;
-        saveOptions.alphaChannels  = ALPHACHANNELKEEP;
+        saveOptions.alphaChannels  = ALPHA_CHANNEL_KEEP;
         saveOptions.embedColorProfile = COLOR_PROFILE_EMBED;
         saveOptions.resolution = TGA_PERPIXELS;
         saveOptions.rleCOMPRESS_DEFAULT = gCompression;
         break;
     case "jpg":
         var saveOptions = JPEGSaveOptions;
-        saveOptions.alphaChannels = ALPHACHANNELKEEP;
+        saveOptions.alphaChannels = ALPHA_CHANNEL_KEEP;
         saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
         saveOptions.matte = JPEG_MATTETYPE;
         saveOptions.quality = JPEGSAVEQUALITY;
@@ -820,7 +820,7 @@ function getOpenOptions(extension)
     return openType;
 }
 
-function isVaildName(name)
+function isValidName(name)
 {
     var invaildWords = new RegExp("[\\/:\"\*\?<>|]+");
     return (!invaildWords.test(name));
