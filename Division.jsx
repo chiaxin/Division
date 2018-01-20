@@ -29,8 +29,7 @@ var EXTENSIONCASE           = Extension.LOWERCASE   ; // File extension is toppe
 var SAVE_PATHS              = getSavePathProc()     ; // Get all path(s) need to save.
 var SAVE_PATH               = SAVE_PATHS[0]         ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.2.0"              ; //
-var TREAT_ALL               = true                  ; // For immediately execute, save images treatment mode.
+var SCRIPT_VER              = "v1.2.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -78,9 +77,9 @@ var TEXT_PATHS      = "path(s)",
     TEXT_ORGSIZE    = "Original",
     TEXT_HALFSIZE   = "Half",
     TEXT_QUADSIZE   = "Quater",
-    TEXT_LOWRES     = "Gen Low",
+    TEXT_LOWRES     = "With Low",
     TEXT_DOLOWRES   = "Building low-res image...",
-    TEXT_LOWRESDONE = "The low-res image was done!",
+    TEXT_LOWRESDONE = "The low-res image is done!",
     TEXT_OVERLAPPING= "Overlapping",
     TEXT_OVERRIDE   = "Override",
     TEXT_IGNOREE    = "Ignore Exists",
@@ -92,7 +91,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_VERSION    = "Suffixes || Gray Keywords",
     TEXT_EXECUTE    = "Executions",
     TEXT_EXEVIS     = "Visible",
-    TEXT_EXEALL     = "All Layers",
+    TEXT_EXEALL     = "All Groups",
     TEXT_CANCEL     = "Cancel",
     TEXT_ADVANCE    = "Advance",
     TEXT_PROCTITLE  = "Processing...",
@@ -187,8 +186,8 @@ function divisionDialog()
     dlg.panelExtensionOptions.orientation = "row";
     dlg.panelExtensionOptions.helpTip = HELP_EXTENSION;
 
-    // If document is 8 bits/channel should be show 3 formats,
-    // else if document is 16 or 32 bits/channel, show TIFF format only
+    // If document is 8 bits/channel should be show 3 formats (tga, tif, jpeg).
+    // else if document is 16 or 32 bits/channel, show TIFF format only.
     // (because tga and jpeg is not supported).
     if(app.activeDocument.bitsPerChannel == BitsPerChannelType.EIGHT) {
         dlg.panelExtensionOptions.rbA = dlg.panelExtensionOptions.add("RadioButton", undefined, "TIF");
@@ -666,12 +665,6 @@ function readingLog()
                 gLaunchLowres = true;
             else
                 gLaunchLowres = false;
-        case "treat_all":
-            if (value=="false" || value=="0")
-                TREAT_ALL = false;
-            else 
-                TREAT_ALL = true;
-            break;
         case "interval_symbol":
             if (value=="_" || value==".")
                 gIntervalSymbol = value;
@@ -722,7 +715,6 @@ function writeLog()
             log.writeln("images_extension = " + gExtension);
         log.writeln("extra_lowres = " + gLaunchLowres);
         log.writeln("images_compression = " + gCompression);
-        log.writeln("treat_all = " + TREAT_ALL);
         log.writeln("interval_symbol = " + gIntervalSymbol);
         log.writeln("version_operate = " + gVersionAppend);
         log.writeln("grayscale_keywords = " + gGrayKeyword);
