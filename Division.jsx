@@ -869,7 +869,12 @@ function isIncludedGrayscale(channel)
 
 function progressRateBar(max)
 {
-    var properties = { maximizeButton:false, minimizeButton:false, borderless:false, resizeable:false };
+    var properties = { 
+        maximizeButton:false, 
+        minimizeButton:false, 
+        borderless:false, 
+        resizeable:false
+    };
     this.pr = new Window("window", TEXT_PROCESSING, undefined, properties);
     this.pr.active = true;
     this.pr.orientation = "column";
