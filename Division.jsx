@@ -260,9 +260,9 @@ function divisionDialog()
         dlg.panelResizeOptions.rbC.value = true;
         break;
     }
-    dlg.panelResizeOptions.rbA.onClick  = function(){ gResizeMode = 1; };
-    dlg.panelResizeOptions.rbB.onClick  = function(){ gResizeMode = 2; };
-    dlg.panelResizeOptions.rbC.onClick  = function(){ gResizeMode = 3; };
+    dlg.panelResizeOptions.rbA.onClick = function(){ gResizeMode = 1; };
+    dlg.panelResizeOptions.rbB.onClick = function(){ gResizeMode = 2; };
+    dlg.panelResizeOptions.rbC.onClick = function(){ gResizeMode = 3; };
 
     // Panel overlapping method options.
     dlg.panelOverlappingOptions = dlg.add("panel", undefined, TEXT_OVERLAPPING);
@@ -276,14 +276,14 @@ function divisionDialog()
     dlg.panelOverlappingOptions.rbB = dlg.panelOverlappingOptions.add(
         "RadioButton", undefined, TEXT_IGNORE_EXISTS
     );
-    dlg.panelOverlappingOptions.rbA.value   = true;
+    dlg.panelOverlappingOptions.rbA.value = true;
     dlg.panelOverlappingOptions.rbA.onClick = function(){ gOverlapping = true; };
     dlg.panelOverlappingOptions.rbB.onClick = function(){ gOverlapping = false; };
 
     // Panel specific interval symbol.
-    dlg.panelIntervalOptions            = dlg.add("panel", undefined, TEXT_INTERVAL);
-    dlg.panelIntervalOptions.helpTip    = HELP_INTERVAL;
-    dlg.panelIntervalOptions.size       = kGlobalPanelSize;
+    dlg.panelIntervalOptions = dlg.add("panel", undefined, TEXT_INTERVAL);
+    dlg.panelIntervalOptions.helpTip = HELP_INTERVAL;
+    dlg.panelIntervalOptions.size = kGlobalPanelSize;
     dlg.panelIntervalOptions.alignChild = "center";
     dlg.panelIntervalOptions.orientation= "row";
     dlg.panelIntervalOptions.rbA = dlg.panelIntervalOptions.add(
@@ -301,10 +301,10 @@ function divisionDialog()
     dlg.panelIntervalOptions.rbB.onClick = function(){ gIntervalSymbol = "."; };
 
     // Panel version suffix operation.
-    dlg.panelVersionOptions             = dlg.add("panel", undefined, TEXT_VERSION);
+    dlg.panelVersionOptions = dlg.add("panel", undefined, TEXT_VERSION);
     dlg.panelOverlappingOptions.helpTip = HELP_OVERLAPPING;
-    dlg.panelVersionOptions.size        = kGlobalPanelSize;
-    dlg.panelVersionOptions.alignChild  = "center";
+    dlg.panelVersionOptions.size = kGlobalPanelSize;
+    dlg.panelVersionOptions.alignChild = "center";
     dlg.panelVersionOptions.orientation = "row";
     dlg.panelVersionOptions.etA = dlg.panelVersionOptions.add(
         "EditText", undefined, gVersionAppend
@@ -330,28 +330,40 @@ function divisionDialog()
     };
 
     // Main execution button.
-    dlg.panelExecution              = dlg.add("panel", undefined, TEXT_EXECUTE);
-    dlg.panelExecution.helpTip      = HELP_COMMAND;
-    dlg.panelExecution.size         = kGlobalPanelSize;
-    dlg.panelExecution.alignChild   = "center";
-    dlg.panelExecution.orientation  = "row";
-    dlg.panelExecution.btnA         = dlg.panelExecution.add("Button", undefined, TEXT_EXECUTE_VISIBLE);
-    dlg.panelExecution.btnB         = dlg.panelExecution.add("Button", undefined, TEXT_EXECUTE_ALL);
-    dlg.panelExecution.btnC         = dlg.panelExecution.add("Button", undefined, TEXT_CANCEL);
-    dlg.panelExecution.btnA.size    = kGlobalButtonSize;
-    dlg.panelExecution.btnB.size    = kGlobalButtonSize;
+    dlg.panelExecution = dlg.add("panel", undefined, TEXT_EXECUTE);
+    dlg.panelExecution.helpTip = HELP_COMMAND;
+    dlg.panelExecution.size = kGlobalPanelSize;
+    dlg.panelExecution.alignChild = "center";
+    dlg.panelExecution.orientation = "row";
+    dlg.panelExecution.btnA = dlg.panelExecution.add(
+        "Button", undefined, TEXT_EXECUTE_VISIBLE
+    );
+    dlg.panelExecution.btnB = dlg.panelExecution.add(
+        "Button", undefined, TEXT_EXECUTE_ALL
+    );
+    dlg.panelExecution.btnC = dlg.panelExecution.add(
+        "Button", undefined, TEXT_CANCEL
+    );
+    dlg.panelExecution.btnA.size = kGlobalButtonSize;
+    dlg.panelExecution.btnB.size = kGlobalButtonSize;
 
     // Panel advance options.
-    dlg.panelAdvanceOptions             = dlg.add("panel", undefined, TEXT_ADVANCE);
-    dlg.panelAdvanceOptions.size        = kGlobalPanelSize;
-    dlg.panelAdvanceOptions.alignChild  = "left";
+    dlg.panelAdvanceOptions = dlg.add("panel", undefined, TEXT_ADVANCE);
+    dlg.panelAdvanceOptions.size = kGlobalPanelSize;
+    dlg.panelAdvanceOptions.alignChild = "left";
     dlg.panelAdvanceOptions.orientation = "row";
-    dlg.panelAdvanceOptions.cbA         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_DISABLE_OUTSIDE);
-    dlg.panelAdvanceOptions.cbA.value   = gDisableOutside;
-    dlg.panelAdvanceOptions.cbB         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_COMPRESS);
-    dlg.panelAdvanceOptions.cbB.value   = gCompression;
-    dlg.panelAdvanceOptions.cbC         = dlg.panelAdvanceOptions.add("CheckBox", undefined, TEXT_WITH_LOW);
-    dlg.panelAdvanceOptions.cbC.value   = gLaunchLow;
+    dlg.panelAdvanceOptions.cbA = dlg.panelAdvanceOptions.add(
+        "CheckBox", undefined, TEXT_DISABLE_OUTSIDE
+    );
+    dlg.panelAdvanceOptions.cbA.value = gDisableOutside;
+    dlg.panelAdvanceOptions.cbB = dlg.panelAdvanceOptions.add(
+        "CheckBox", undefined, TEXT_COMPRESS
+    );
+    dlg.panelAdvanceOptions.cbB.value = gCompression;
+    dlg.panelAdvanceOptions.cbC = dlg.panelAdvanceOptions.add(
+        "CheckBox", undefined, TEXT_WITH_LOW
+    );
+    dlg.panelAdvanceOptions.cbC.value = gLaunchLow;
     dlg.panelAdvanceOptions.cbA.onClick = function(){ gDisableOutside = !gDisableOutside; };
     dlg.panelAdvanceOptions.cbB.onClick = function(){ gCompression = !gCompression; };
     dlg.panelAdvanceOptions.cbC.onClick = function(){ gLaunchLow = !gLaunchLow; }; 
