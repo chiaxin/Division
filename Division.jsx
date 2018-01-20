@@ -26,8 +26,8 @@
 var COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
 var ALPHA_CHANNEL_KEEP      = false                 ; // The Alpha channel keep or not.
 var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
-var SAVE_PATHS              = getSavePathProc()     ; // Get all path(s) need to save.
-var SAVE_PATH               = SAVE_PATHS[0]         ; // Default save path.
+var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
+var SAVE_PATH               = ""                    ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
 var SCRIPT_VER              = "v1.2.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
@@ -133,6 +133,8 @@ function Division()
     {
         return false;
     }
+    SAVE_PATHS = getSavePathProc(); // Get all path(s) need to save.
+    SAVE_PATH = SAVE_PATHS[0]; // Default save path.
     
     if(!readingLog()) writeLog();
 
@@ -613,7 +615,7 @@ function activeDocumentCheck()
 {
     if ( app.documents.length == 0 )
     {
-        alert(TEXT_NO_DOCUMENTS);
+        alert(TEXT_NO_DOCUMENTS, UI_TITLE+SCRIPT_VER);
         return false;
     }
     try {
@@ -650,14 +652,14 @@ function getSavePathProc()
     var pathIsDuplicated = false;
 
     // Loop for search text-layers
-    for(i=0 ; i<docLayers.length ; i++)
+    for (i = 0 ; i < docLayers.length ; i++)
     {
         // Reset pathIsDuplicated notation
         pathIsDuplicated = false;
         if(docLayers[i].kind == LayerKind.TEXT)
         {
             // Check previous others if duplicated
-            for(j=workPaths.length-1 ; j>=0 ; j--)
+            for (j = workPaths.length-1 ; j >= 0 ; j--)
             {
                 if(docLayers[i].textItem.contents == workPaths[j])
                 {
