@@ -37,8 +37,8 @@ var LOW_SUFFIX              = ".low"                ; // Low Resolution name suf
 var LOW_RATIO               = 4                     ; // How many ratio to reduce? 
 
 // TIFF Format
-var TIFF_BYTE_ORDER         = ByteOrder.IBM         ; //TIFF format byte order.
-var TIFF_COMP_ENCODING      = TIFFEncoding.TIFFLZW  ; //TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
+var TIFF_BYTE_ORDER         = ByteOrder.IBM         ; // TIFF format byte order.
+var TIFF_COMP_ENCODING      = TIFFEncoding.TIFFLZW  ; // TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
 
 // JPEG Format
 var JPEG_FORMAT = FormatOptions.STANDARDBASELINE    ; // JPEG format.
@@ -113,6 +113,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_PARENT_END = " ] ",
     TEXT_NO_ANY_VISIBLE = "Do \"Visible\" must have one group visible at least!",
     TEXT_IS_NOT_PSD = "This document is not a PSD file!",
+    TEXT_NO_DOCUMENTS = "There have no any document!",
     HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
     HELP_EXTENSION  = "Image format selections, TIF, TGA or JPG",
     HELP_RESIZE     = "Resize image after saving.",
@@ -610,6 +611,11 @@ function divisionMainProc(outputMode)
 // Check Active-Document legal.
 function activeDocumentCheck()
 {
+    if ( app.documents.length == 0 )
+    {
+        alert(TEXT_NO_DOCUMENTS);
+        return false;
+    }
     try {
         var curDoc = app.activeDocument;
     } catch(e) {
