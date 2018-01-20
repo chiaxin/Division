@@ -22,10 +22,10 @@
 //           Microsoft Windows 10
 //    [ Photoshop ] Adobe Photoshop CS6 v13.0.1 x64
 // ----------------------------------------------------------------------------
-// Const Variablies
-var COLORPROFILEEMBED       = false                 ; // The Color-profile embed or not.
+//
+var COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
 var ALPHACHANNELKEEP        = false                 ; // The Alpha channel keep or not.
-var EXTENSIONCASE           = Extension.LOWERCASE   ; // File extension is toppercase or lowercase? 
+var EXTENSIONCASE           = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
 var SAVE_PATHS              = getSavePathProc()     ; // Get all path(s) need to save.
 var SAVE_PATH               = SAVE_PATHS[0]         ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
@@ -33,7 +33,7 @@ var SCRIPT_VER              = "v1.2.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
-var LOWRES_SUFFIX           = ".lowres"             ; // Low Resoulution name suffix.
+var LOWRES_SUFFIX           = ".lowres"             ; // Low Resolution name suffix.
 var LOWRES_RATIO            = 4                     ; // How many ratio to reduce? 
 
 // TIFF Format
@@ -53,11 +53,11 @@ var SCRIPT_NAME     = "Division.jsx"                        ; // The local scrip
 var LOG_NAME        = "DivisionLog.txt"                     ; // The log txt.
 var SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script folder.
 
-// Global variablies
+// Global variables
 var gImagePixel     = 72;       // Document's pixel. The default is 72.
 var gCompression    = true;     // Compression image option.
 var gGrayKeyword    = "";       // The keyword(s) define gray image.
-var gNumVisiblies   = 0;        //
+var gNumVisible   = 0;        //
 var gLayNumVisiblies= 0;        //
 var gVersionAppend  = "";       // Indicate the version string suffix.
 var gIntervalSymbol = "_";      // Indicate the interval symbol, underscore or dot.
@@ -143,7 +143,7 @@ function Division()
 // Main GUI:
 function divisionDialog()
 {
-    // Main winodw describe.
+    // Main window
     var kGlobalPanelSize  = { width:280, height:46 };
     var kGlobalButtonSize = { width:72 , height:24 };
     var kGlobalEditTextSize = { width:80, height:22 };
@@ -287,14 +287,14 @@ function divisionDialog()
     dlg.panelVersionOptions.etB = dlg.panelVersionOptions.add("EditText", undefined, gGrayKeyword);
     dlg.panelVersionOptions.etB.preferredSize = kGlobalEditTextSize2;
     dlg.panelVersionOptions.etA.onChange = function() {
-        if(isVaildName(dlg.panelVersionOptions.etA.text)) {
+        if(isValidName(dlg.panelVersionOptions.etA.text)) {
             gVersionAppend = dlg.panelVersionOptions.etA.text;
         } else {
             dlg.panelVersionOptions.etA.text = "";
         }
     };
     dlg.panelVersionOptions.etB.onChange = function() {
-        if(isVaildName(dlg.panelVersionOptions.etB.text)) {
+        if(isValdName(dlg.panelVersionOptions.etB.text)) {
             gGrayKeyword = dlg.panelVersionOptions.etB.text;
         } else {
             dlg.panelVersionOptions.etA.text = "";
@@ -344,7 +344,7 @@ function divisionDialog()
         divisionMainProc(true);
     };
 
-    // Canel button onClick.
+    // Cancel button onClick.
     dlg.panelExecution.btnC.onClick = function () {
         dlg.close(0);
         delete dlg;
@@ -386,11 +386,11 @@ function divisionMainProc(outputMode)
         var resizeWidth  = curDoc.width
     }
     var saveOption = getSaveOptions(gExtension);
-    var visibleLayerSets = getLayerSetsVisibilities(curDoc);
-    var visibleLayers = getLayersVisibilities(curDoc);
+    var visibleLayerSets = getLayerSetVisible(curDoc);
+    var visibleLayers = getLayerVisible(curDoc);
 
     // If do visible layer-sets only with zero visibility, warning and quit.
-    if( !gNumVisiblies && !outputMode ) {
+    if( !gNumVisible && !outputMode ) {
         alert( TEXT_NOVISIBLE, UI_TITLE + SCRIPT_VER );
         return false;
     }
@@ -405,7 +405,7 @@ function divisionMainProc(outputMode)
     if( outputMode ) {
         var rate = new progressRateBar( curDoc.layerSets.length * rate_multi );
     } else {
-        var rate = new progressRateBar( gNumVisiblies * rate_multi );
+        var rate = new progressRateBar( gNumVisible * rate_multi );
     }
 
     rate.show();
@@ -729,18 +729,18 @@ function writeLog()
     return true;
 }
 
-function getLayerSetsVisibilities(workDoc)
+function getLayerSetVisible(workDoc)
 {
-    gNumVisiblies = 0;
+    gNumVisible = 0;
     var visibleLayerSets = [];
     for ( i = 0 ; i < workDoc.layerSets.length ; i++ ) {
         visibleLayerSets.push(workDoc.layerSets[i].visible);
-        if(visibleLayerSets[i]) gNumVisiblies++;
+        if(visibleLayerSets[i]) gNumVisible++;
     }
     return visibleLayerSets;
 }
 
-function getLayersVisibilities(workDoc)
+function getLayerVisible(workDoc)
 {
     gLayNumVisiblies = 0;
     var visibleLayers = [];
@@ -775,7 +775,7 @@ function getSaveOptions(extension)
         var saveOptions = TiffSaveOptions;
         saveOptions.alphaChannels = ALPHACHANNELKEEP;
         saveOptions.byteOrder = TIFF_BYTEODER;
-        saveOptions.embedColorProfile= COLORPROFILEEMBED;
+        saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
         saveOptions.layers = false;
         if(gCompression)
             saveOptions.imageCompression = TIFFCOMPRESSENCODING;
@@ -785,14 +785,14 @@ function getSaveOptions(extension)
     case "tga":
         var saveOptions = TargaSaveOptions;
         saveOptions.alphaChannels  = ALPHACHANNELKEEP;
-        saveOptions.embedColorProfile = COLORPROFILEEMBED;
+        saveOptions.embedColorProfile = COLOR_PROFILE_EMBED;
         saveOptions.resolution = TGA_PERPIXELS;
         saveOptions.rleCOMPRESS_DEFAULT = gCompression;
         break;
     case "jpg":
         var saveOptions = JPEGSaveOptions;
         saveOptions.alphaChannels = ALPHACHANNELKEEP;
-        saveOptions.embedColorProfile= COLORPROFILEEMBED;
+        saveOptions.embedColorProfile= COLOR_PROFILE_EMBED;
         saveOptions.matte = JPEG_MATTETYPE;
         saveOptions.quality = JPEGSAVEQUALITY;
         saveOptions.scans = JPEG_FORMAT;
