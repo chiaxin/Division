@@ -1,8 +1,8 @@
 # Division
 
-## The Photoshop script
+## Photoshop script
 
-### This simple Photoshop script can be save each group out to images
+### This is a simple Photoshop script can be save each group out
 
 #### Version : 1.2.0
 
@@ -15,20 +15,24 @@
 
 ## How to use
 
-+ Create a "text layer" and key the full path you want to save
-+ If no path or directory is not exists, It would save path be same as PSD file
-+ Press "visible" or "All Layers" button to process
-+ Final image name rule is </br><PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
++ Create a "text layer" and key the full path you want to save.
++ If no path or directory is not exists, It would save path be same as PSD file.
++ Press "visible" or "All Layers" button to process.
++ Final image name is </br><PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
 
 ## Limit
 
-+ PSD file need saved.
-+ Layer-Set(group) at least have one layer, otherwise would be ignore.
-+ If color-depth is not 8bits, Just TIFF format can be export only
++ The Photoshop file need saved before.
++ The group must has layer(not group), otherwise it would be ignored.
++ If color depth is not 8 bits, Just TIFF format can be export only.
 
 ## Photoshop Support
 
-Photoshop CS4, CS5, CS6
++ Photoshop CS6
++ Photoshop CC 2014
++ Photoshop CC 2015
++ Photoshop CC 2015.5
++ Photoshop CC 2017
 
 ## OS Support
 

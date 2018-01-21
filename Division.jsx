@@ -18,9 +18,15 @@
 //    Last update : January, 19, 2018
 //
 //    Test and Debug Platform : 
-//    [ OS ] Microsoft Windows 7 x64
-//           Microsoft Windows 10
-//    [ Photoshop ] Adobe Photoshop CS6 v13.0.1 x64
+//    + OS 
+//      + Microsoft Windows 7 x64
+//      + Microsoft Windows 10
+//    + Photoshop 
+//      + Adobe Photoshop CS6
+//      + Adobe Photoshop CC 2014
+//      + Adobe Photoshop CC 2015
+//      + Adobe Photoshop CC 2015.5
+//      + Adobe Photoshop CC 2017
 // ----------------------------------------------------------------------------
 //
 var COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
@@ -102,7 +108,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_DO_OVERRIDE = "File exists...Overriding.",
     TEXT_EMPTY_SKIP = "is empty...Skip",
     TEXT_DO_RESIZE  = "Image Resize...",
-    TEXT_COMPLETED  = " image(s) saved,",
+    TEXT_COMPLETED  = " image(s) saved",
     TEXT_INVALID_NAME = " invalid, Ignore.",
     TEXT_TIFF_ONLY  = "TIFF format only, Because file is not 8 bits",
     TEXT_ANALYSIS   = "Grayscale Analysis...",
@@ -462,7 +468,7 @@ function divisionMainProc(outputMode)
         }
     }
 
-    // Loop saving each layerSet(s)
+    // Batch to save
     for( i = 0 ; i < curDoc.layerSets.length ; i++ ) {
         var channel_name = curDoc.layerSets[i].name + gVersionAppend;
         if( !isValidName( channel_name ) ) {
@@ -504,7 +510,7 @@ function divisionMainProc(outputMode)
 
         // Try to save image if any unexception error occur, quit this process.
         try {
-            curDoc.saveAs(fileBuff, saveOption, true, EXTENSION_CASE);    //Saving image.
+            curDoc.saveAs(fileBuff, saveOption, true, EXTENSION_CASE); //Saving image.
             rate.plus(1);
         } catch(e) {
             alert( e, UI_TITLE + " " + SCRIPT_VER );
@@ -515,16 +521,15 @@ function divisionMainProc(outputMode)
 
         var openType = getOpenOptions(gExtension);
 
-        //If resize value is 2 or 3 (half and Quad)
+        // Resize mode is 2 or 3 (half and Quad)
         if( gResizeMode != 1 ) {
             rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END + TEXT_DO_RESIZE );
             try {
-                var workDoc = app.open( fileBuff, openType ); //Open new document.
+                var workDoc = app.open(fileBuff, openType); //Open new document.
                 app.activeDocument = workDoc; //Setting work document active.
-                //Resize image(Half or Quad).
-                while( workDoc.height.value != resizeHeight )
+                while(workDoc.height.value != resizeHeight)
                 {
-                    workDoc.resizeImage( resizeWidth, resizeHeight, gImagePixel );
+                    workDoc.resizeImage(resizeWidth, resizeHeight, gImagePixel);
                 }
                 workDoc.close(SaveOptions.SAVECHANGES); // Close with save.
                 app.activeDocument = curDoc;            // Focus previous document.
@@ -534,11 +539,12 @@ function divisionMainProc(outputMode)
             rate.plus(1);
         }
 
-        if( gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE )
+        // Convert to grayscale mode
+        if(gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE)
         {
             rate.setInfo( channel_name + " -> " + TEXT_ANALYSIS );
-            if( isIncludedGrayscale( curDoc.layerSets[i].name ) ) {
-                var workDoc = app.open( fileBuff, openType );
+            if( isIncludedGrayscale(curDoc.layerSets[i].name) ) {
+                var workDoc = app.open(fileBuff, openType);
                 app.activeDocument = workDoc;
                 try {
                     workDoc.changeMode(ChangeMode.GRAYSCALE);
@@ -550,7 +556,7 @@ function divisionMainProc(outputMode)
                 app.activeDocument = curDoc;
                 rate.setInfo(TEXT_DO_GRAY);
             } else {
-                rate.setInfo( TEXT_SKIP_GRAY );
+                rate.setInfo(TEXT_SKIP_GRAY);
             }
             rate.plus(1);
         }
@@ -563,8 +569,8 @@ function divisionMainProc(outputMode)
                 SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + 
                 LOW_SUFFIX + "." + gExtension
             );
-            var low_res_width = Math.floor( resizeWidth / LOW_RATIO );
-            var low_res_height= Math.floor( resizeHeight/ LOW_RATIO );
+            var low_res_width = Math.floor(resizeWidth / LOW_RATIO);
+            var low_res_height= Math.floor(resizeHeight/ LOW_RATIO);
             var workDoc = app.open( fileBuff, openType );
             app.activeDocument = workDoc;
             try {
@@ -581,27 +587,30 @@ function divisionMainProc(outputMode)
         }
         delete fileBuff;
 
-        if( gProcessBreak ) {
-            alert( "Process has been terminated", UI_TITLE );
+        if(gProcessBreak) {
+            alert( "Process has been terminated", UI_TITLE);
             break;
         }
     }
     // Recover original layerSet visible status.
     setLayerSetVisible( curDoc, visibleLayerSets );
-
+   
+    // Recover outside layer visible status if disable outside is launch.
     if (gDisableOutside)
     {
         setLayerVisible(curDoc, visibleLayers);
     }
 
-    // Tell user how many images save successfully, then close rate window.
-    if( !gProcessBreak )
+    // Tell user how many images is saved, then close rate window.
+    if(!gProcessBreak)
     {
         var result_report = numberOfSuccess + TEXT_COMPLETED;
-        if( gGrayKeyword != "" && curDoc.mode!=DocumentMode.GRAYSCALE ) {
+        if(gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE) {
             result_report += (", " + numberOfGrayscale + TEXT_GRAY_INFO);
+        } else {
+            result_report += ".";
         }
-        rate.setInfo( result_report );
+        rate.setInfo(result_report);
         $.sleep(ENDING_WAIT);
         writeLog();
         rate.close();
