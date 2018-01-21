@@ -15,6 +15,7 @@
 
 ## How to use
 
++ Build some groups you want to export.
 + Create a "text layer" and key the full path you want to save.
 + If no path or directory is not exists, It would save path be same as PSD file.
 + Press "visible" or "All Layers" button to process.
