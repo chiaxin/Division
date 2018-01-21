@@ -15,11 +15,11 @@
 
 ## How to use
 
-+ Build some groups you want to export.
-+ Create a "text layer" and key the full path you want to save.
-+ If no path or directory is not exists, It would save path be same as PSD file.
-+ Press "visible" or "All Layers" button to process.
-+ Final image name is </br><PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
++ Build several groups you want to export.
++ Create a "text layer" and key the full path you want to save.(can be multi).
++ If no path or directory is not exists, It will save path be same as PSD file.
++ Press "Visible" or "All Groups" button to process.
++ Output name is <PSD_NAME>\<INTERVAL>\<GROUP_NAME>\<SUFFIX>.\<Extension>
 
 ## Limit
 
