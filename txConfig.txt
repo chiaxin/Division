@@ -1,0 +1,7 @@
+bin=C:\solidangle\mtoadeploy\2017\bin\maketx.exe
+arguments=--threads 4 --monochrome-detect --opaque-detect --constant-color-detect --fixnan box3 --oiio -v -u --unpremult
+colorspace=scene-linear Rec 709/sRGB
+colorconfig=%userprofile%\documents\maya\2017\prefs
+sRGB=_S_
+Raw=_R_
+default=Raw
