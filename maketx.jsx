@@ -110,6 +110,7 @@ function maketx(images)
     var bat_fh = new File(bat_file);
     try {
         bat_fh.open('w');
+        bat_fh.writeln("@echo off");
         for (i = 0 ; i < images.length ; i++)
         {
             var image = win_path(images[i]);
@@ -127,18 +128,15 @@ function maketx(images)
             bn += ".tx";
             var output_path = temp_folder + "\\" + bn;
             output_path = windows_style_path(output_path);
-            var full_command = bat_command + " -o \"" + output_path + "\"" + " " + image_color_space + " " + "\"" + image + "\"";
+            var full_command = bat_command + " -o \"" + output_path + "\"";
+            full_command += " " + image_color_space + " " + "\"" + image + "\"";
             bat_fh.writeln(full_command);
             var copy_cmd = "xcopy /Y ";
             copy_cmd += "\"" + windows_style_path(output_path) + "\" \"" + win_path(dirname(image)) + "\"";
             bat_fh.writeln(copy_cmd);
         }
         var exec_result = bat_fh.execute();
-        if (exec_result)
-        {
-            alert("Make tx successful");
-        }
-        else
+        if (!exec_result)
         {
             alert("Make tx failed.");
         }

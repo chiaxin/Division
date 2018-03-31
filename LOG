@@ -21,3 +21,6 @@ ver 1.2.0 : Jan, 19, 2018
     3. Fix a problem, if the document is not a psd file, report error.
     4. Make reside mode can be store.
     5. Script restructure and retouch structure.
+
+ver 1.3.0 : Mar, 31, 2018
+    1. Add make tx for arnold renderer.

@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.2.0
+//    Version : 1.3.0
 //
-//    Last update : January, 19, 2018
+//    Last update : 2018-03-31
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -35,7 +35,7 @@ var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is upper
 var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
 var SAVE_PATH               = ""                    ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.2.0"              ; // Version.
+var SCRIPT_VER              = "v1.3.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -74,6 +74,7 @@ var gLaunchLow      = false;    // Do generate low resolution image or not.
 var gExtensionStore = "tga";    //
 var gProcessBreak   = false;    //
 var gDisableOutside = false;    // When save, disable outside layer at first.
+var gAfterMaketx    = false;    // Make tx image after texture saved.
 
 // GUI text info defined
 var TEXT_PATHS      = "path(s)",
@@ -241,6 +242,13 @@ function divisionDialog()
         gExtensionStore = gExtension;
         gExtension = "tif";
     }
+    dlg.panelExtensionOptions.cbA = dlg.panelExtensionOptions.add(
+        "CheckBox", undefined, "Maketx"
+    );
+    dlg.panelExtensionOptions.cbA.value = gAfterMaketx;
+    dlg.panelExtensionOptions.cbA.onClick = function() {
+        gAfterMaketx = !gAfterMaketx;
+    };
 
     // Panel resize image options.
     dlg.panelResizeOptions = dlg.add("panel", undefined, TEXT_RESIZE);
@@ -467,6 +475,9 @@ function divisionMainProc(outputMode)
             curDoc.layers[i].visible = false;
         }
     }
+    
+    // Store saved images for maketx.
+    var saved_images = new Array();
 
     // Batch to save
     for( i = 0 ; i < curDoc.layerSets.length ; i++ ) {
@@ -492,9 +503,8 @@ function divisionMainProc(outputMode)
 
         // Prepare file path
         rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END );
-        var fileBuff = new File(
-            SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + "." + gExtension
-        );
+        var full_export_name = SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + "." + gExtension;
+        var fileBuff = new File(full_export_name);
 
         //If gOverlapping is off and file exists.skip it.
         //Otherwise override it, create new one if not exists.
@@ -511,6 +521,7 @@ function divisionMainProc(outputMode)
         // Try to save image if any unexception error occur, quit this process.
         try {
             curDoc.saveAs(fileBuff, saveOption, true, EXTENSION_CASE); //Saving image.
+            saved_images.push(full_export_name);
             rate.plus(1);
         } catch(e) {
             alert( e, UI_TITLE + " " + SCRIPT_VER );
@@ -599,6 +610,19 @@ function divisionMainProc(outputMode)
     if (gDisableOutside)
     {
         setLayerVisible(curDoc, visibleLayers);
+    }
+
+    // Maketx after.
+    if (gAfterMaketx)
+    {
+        // Debug 
+        // for (i = 0 ; i < saved_images.length ; i++)
+        // {
+        //    alert(saved_images[i]);
+        // }
+        $.evalFile("" + (File($.fileName).path) + "/maketx.jsx");
+        rate.setInfo("Make tx image");
+        maketx(saved_images);
     }
 
     // Tell user how many images is saved, then close rate window.
@@ -748,14 +772,19 @@ function readingLog()
             else if (value == "2")
                 gResizeMode = 2;
             else if (value == "3")
-                gResizeMode = 3
+                gResizeMode = 3;
             break;
         case "disable_outside":
             if (value == "true" || value == "1")
-                gDisableOutside = true
+                gDisableOutside = true;
             else
                 gDisableOutside = false;
             break;
+        case "maketx":
+            if (value == "true" || value == "1")
+                gAfterMaketx = true;
+            else
+                gAfterMaketx = false;
         }
     }
     log.close(); 
@@ -766,6 +795,7 @@ function readingLog()
 function writeLog()
 {
     var log = new File(SCRIPT_FOLDER + LOG_NAME);
+    var stat = true;
     try {
         log.open('w');
         if(gExtensionStore != gExtension)
@@ -779,13 +809,15 @@ function writeLog()
         log.writeln("grayscale_keywords = " + gGrayKeyword);
         log.writeln("resize_mode = " + gResizeMode);
         log.writeln("disable_outside = " + gDisableOutside);
-        log.close();
+        log.writeln("maketx = " + gAfterMaketx);
     } catch(e) {
         alert(e, UI_TITLE + SCRIPT_VER);
-        return false;
+        stat = false;
+    } finally {
+        log.close();
+        delete log;
     }
-    delete log;
-    return true;
+    return stat;
 }
 
 function getLayerSetVisible(workDoc)
@@ -794,7 +826,10 @@ function getLayerSetVisible(workDoc)
     var visibleLayerSets = [];
     for ( i = 0 ; i < workDoc.layerSets.length ; i++ ) {
         visibleLayerSets.push(workDoc.layerSets[i].visible);
-        if(visibleLayerSets[i]) gNumVisible++;
+        if(visibleLayerSets[i]) 
+        {
+            gNumVisible++;
+        }
     }
     return visibleLayerSets;
 }
