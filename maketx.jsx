@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
 //
-//  maketx
+//  maketx module
 //
 // ---------------------------------------------------------------------------
 //
-var MAKETX_config_FILE="/txConfig.txt";
-var GENERATE_TX_BAT="/division_generate_tx.bat";
+var MAKETX_config_FILE = "/txConfig.txt";
+var GENERATE_TX_TEMP_BAT = "/division_generate_tx.bat";
 
 function basename(name)
 {
@@ -39,31 +39,55 @@ function windows_style_path(path)
     return win_path(ws_path);
 }
 
+function get_temp_folder()
+{
+    return win_path($.getenv('temp'));
+}
+
+function qw(str)
+{
+    return ("\"" + str + "\"");
+}
+
+function join(args)
+{
+    var line = new String();
+    for (a_idx = 0 ; a_idx < args.length ; a_idx++)
+    {
+        line += args[a_idx] + " ";
+    }
+    return line;
+}
+
+function has_keyword(word, patterns)
+{
+    for (p_idx = 0 ; p_idx < patterns.length ; p_idx++)
+    {
+        if (word.search(patterns[p_idx]) > 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 function maketx(images)
 {
     var maketx_config = "" + (File($.fileName).path) + MAKETX_config_FILE;
     var config = new File(maketx_config);
     if (!config.exists) {
         alert("The maketx config was not found : " + maketx_config);
-        return 0;
+        return -1;
     }
-    var bin = "";
-    var maketx_arguments = "";
-    var colorspace = "";
-    var colorconfig = "";
-    var default_color_profile = "";
-    var srgb = "";
-    var raw = "";
+    var bin = maketx_arguments = colorspace = colorconfig = default_color_profile = "";
+    var srgb;
+    var raw;
     try {
         config.open("r");
         while(!config.eof)
         {
-            contents = config.readln();
-            contents = contents.split("=");
-            if (contents.length < 2) 
-            {
-                continue;
-            }
+            contents = config.readln().split("=");
+            if (contents.length < 2) continue;
             value = contents[1];
             switch(contents[0].replace(" ", ""))
             {
@@ -80,10 +104,10 @@ function maketx(images)
                 colorconfig = value;
                 break;
             case "sRGB":
-                srgb = value;
+                srgb = value.split(" ");
                 break;
             case "Raw":
-                raw = value;
+                raw = value.split(" ");
                 break;
             case "default":
                 default_color_profile = value;
@@ -95,48 +119,30 @@ function maketx(images)
     } finally {
         config.close();
     }
-    if (bin.length == 0 || arguments.length == 0 
-        || colorspace == 0 || colorconfig == 0
-        || default_color_profile == 0)
-    {
-        alert("Error maketx arguments.");
-        return 0;
-    }
-    var bat_command = new String("\"" + bin + "\"");
-    bat_command += " " + maketx_arguments;
-    bat_command += " " + "--colorengine syncolor --colorconfig \"" + colorconfig + "\"";
-    var temp_folder = Folder.temp;
-    var bat_file = win_path(temp_folder + GENERATE_TX_BAT);
+    var bat_command = join([qw(bin), maketx_arguments, "--colorengine", "syncolor",
+                      "--colorconfig", qw(colorconfig)]);
+    var temp_folder = get_temp_folder();
+    var bat_file = win_path(temp_folder + GENERATE_TX_TEMP_BAT);
     var bat_fh = new File(bat_file);
     try {
         bat_fh.open('w');
         bat_fh.writeln("@echo off");
-        for (i = 0 ; i < images.length ; i++)
+        for (img_id = 0 ; img_id < images.length ; img_id++)
         {
-            var image = win_path(images[i]);
+            var image = win_path(images[img_id]);
             var image_color_space = default_color_profile;
-            if (image.search(srgb) > 0)
-            {
+            if (has_keyword(image, srgb))
                 image_color_space = "sRGB";
-            }
-            else if (image.search(raw) > 0)
-            {
+            else if (has_keyword(image, raw))
                 image_color_space = "Raw";
-            }
-            image_color_space = "--colorconvert " + image_color_space + " \"" + colorspace + "\"";
-            var bn = basename(image);
-            bn += ".tx";
-            var output_path = temp_folder + "\\" + bn;
-            output_path = windows_style_path(output_path);
-            var full_command = bat_command + " -o \"" + output_path + "\"";
-            full_command += " " + image_color_space + " " + "\"" + image + "\"";
-            bat_fh.writeln(full_command);
-            var copy_cmd = "xcopy /Y ";
-            copy_cmd += "\"" + windows_style_path(output_path) + "\" \"" + win_path(dirname(image)) + "\"";
+            image_color_space = join(["--colorconvert", image_color_space, qw(colorspace)]);
+            var output_path = temp_folder + "\\" + basename(image) + ".tx";
+            var make_cmd = join([bat_command, "-o", qw(output_path), image_color_space, qw(image)]);
+            var copy_cmd = join(["xcopy /Y", qw(output_path), qw(dirname(image))]);
+            bat_fh.writeln(make_cmd);
             bat_fh.writeln(copy_cmd);
         }
-        var exec_result = bat_fh.execute();
-        if (!exec_result)
+        if (!bat_fh.execute())
         {
             alert("Make tx failed.");
         }
@@ -145,5 +151,7 @@ function maketx(images)
     } finally {
         bat_fn.close();
     }
-    return 1;
+    return 0;
 }
+
+// maketx end

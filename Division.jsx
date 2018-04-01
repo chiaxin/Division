@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.3.0
+//    Version : 1.3.1
 //
-//    Last update : 2018-03-31
+//    Last update : 2018-04-01
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -35,7 +35,7 @@ var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is upper
 var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
 var SAVE_PATH               = ""                    ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.3.0"              ; // Version.
+var SCRIPT_VER              = "v1.3.1"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -74,7 +74,7 @@ var gLaunchLow      = false;    // Do generate low resolution image or not.
 var gExtensionStore = "tga";    //
 var gProcessBreak   = false;    //
 var gDisableOutside = false;    // When save, disable outside layer at first.
-var gAfterMaketx    = false;    // Make tx image after texture saved.
+var gAutoGenerateTx    = false;    // Make tx image after texture saved.
 
 // GUI text info defined
 var TEXT_PATHS      = "path(s)",
@@ -93,6 +93,7 @@ var TEXT_PATHS      = "path(s)",
     TEXT_NEW_FILE   = "Saving a new image...",
     TEXT_INTERVAL   = "Intervals",
     TEXT_UNDERSCORE = "Underscore",
+    TEXT_MAKETX     = "maketx",
     TEXT_DISABLE_OUTSIDE = "Dis Outside",
     TEXT_DOT        = "Dot",
     TEXT_VERSION    = "Suffixes || Gray Keywords",
@@ -243,11 +244,11 @@ function divisionDialog()
         gExtension = "tif";
     }
     dlg.panelExtensionOptions.cbA = dlg.panelExtensionOptions.add(
-        "CheckBox", undefined, "Maketx"
+        "CheckBox", undefined, TEXT_MAKETX
     );
-    dlg.panelExtensionOptions.cbA.value = gAfterMaketx;
+    dlg.panelExtensionOptions.cbA.value = gAutoGenerateTx;
     dlg.panelExtensionOptions.cbA.onClick = function() {
-        gAfterMaketx = !gAfterMaketx;
+        gAutoGenerateTx = !gAutoGenerateTx;
     };
 
     // Panel resize image options.
@@ -309,7 +310,7 @@ function divisionDialog()
     dlg.panelIntervalOptions.rbB = dlg.panelIntervalOptions.add(
         "RadioButton", undefined, TEXT_DOT
     );
-    if(gIntervalSymbol==".") {
+    if(gIntervalSymbol == ".") {
         dlg.panelIntervalOptions.rbB.value = true;
     } else {
         dlg.panelIntervalOptions.rbA.value = true;
@@ -469,9 +470,10 @@ function divisionMainProc(outputMode)
     var numberOfSuccess = 0;
     var numberOfGrayscale = 0;
 
+    // If disable outside is on, hide all outside layers.
     if (gDisableOutside)
     {
-        for ( i = 0 ; i < curDoc.layers.length ; i++ ) {
+        for (i = 0 ; i < curDoc.layers.length ; i++) {
             curDoc.layers[i].visible = false;
         }
     }
@@ -480,10 +482,10 @@ function divisionMainProc(outputMode)
     var saved_images = new Array();
 
     // Batch to save
-    for( i = 0 ; i < curDoc.layerSets.length ; i++ ) {
+    for(i = 0 ; i < curDoc.layerSets.length ; i++) {
         var channel_name = curDoc.layerSets[i].name + gVersionAppend;
-        if( !isValidName( channel_name ) ) {
-            rate.setInfo( channel_name + " " + TEXT_INVALID_NAME );
+        if( !isValidName(channel_name) ) {
+            rate.setInfo(channel_name + " " + TEXT_INVALID_NAME);
             rate.plus( rate_multi );
             continue;
         } else if( !visibleLayerSets[i] && !outputMode ) {
@@ -576,10 +578,9 @@ function divisionMainProc(outputMode)
         if( gLaunchLow )
         {
             rate.setInfo(channel_name + " -> " + TEXT_BUILD_LOW);
-            low_res_file = new File(
-                SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + 
-                LOW_SUFFIX + "." + gExtension
-            );
+            low_res_file_name = SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name
+                + LOW_SUFFIX + "." + gExtension;
+            low_res_file = new File(low_res_file_name);
             var low_res_width = Math.floor(resizeWidth / LOW_RATIO);
             var low_res_height= Math.floor(resizeHeight/ LOW_RATIO);
             var workDoc = app.open( fileBuff, openType );
@@ -588,6 +589,7 @@ function divisionMainProc(outputMode)
                 workDoc.resizeImage( low_res_width, low_res_height, gImagePixel );
                 workDoc.saveAs( low_res_file, saveOption, false, EXTENSION_CASE );
                 workDoc.close( SaveOptions.DONOTSAVECHANGES );
+                saved_images.push(low_res_file_name);
             } catch(e) {
                 alert(e, UI_TITLE + " " + SCRIPT_VER );
             }
@@ -613,16 +615,22 @@ function divisionMainProc(outputMode)
     }
 
     // Maketx after.
-    if (gAfterMaketx)
+    if (gAutoGenerateTx)
     {
         // Debug 
         // for (i = 0 ; i < saved_images.length ; i++)
         // {
         //    alert(saved_images[i]);
         // }
-        $.evalFile("" + (File($.fileName).path) + "/maketx.jsx");
-        rate.setInfo("Make tx image");
-        maketx(saved_images);
+        var maketx_module = "" + File($.fileName).path + "/maketx.jsx";
+        var maketx_file = new File(maketx_module);
+        if (maketx_file.exists) {
+            $.evalFile(maketx_file);
+            rate.setInfo("Make tx image");
+            maketx(saved_images);
+        } else {
+            rate.setInfo("Maketx script not found.");
+        }
     }
 
     // Tell user how many images is saved, then close rate window.
@@ -782,9 +790,9 @@ function readingLog()
             break;
         case "maketx":
             if (value == "true" || value == "1")
-                gAfterMaketx = true;
+                gAutoGenerateTx = true;
             else
-                gAfterMaketx = false;
+                gAutoGenerateTx = false;
         }
     }
     log.close(); 
@@ -809,7 +817,7 @@ function writeLog()
         log.writeln("grayscale_keywords = " + gGrayKeyword);
         log.writeln("resize_mode = " + gResizeMode);
         log.writeln("disable_outside = " + gDisableOutside);
-        log.writeln("maketx = " + gAfterMaketx);
+        log.writeln("maketx = " + gAutoGenerateTx);
     } catch(e) {
         alert(e, UI_TITLE + SCRIPT_VER);
         stat = false;
