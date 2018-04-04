@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.3.1
+//    Version : 1.4.0
 //
-//    Last update : 2018-04-01
+//    Last update : 2018-04-04
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -35,7 +35,7 @@ var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is upper
 var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
 var SAVE_PATH               = ""                    ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.3.1"              ; // Version.
+var SCRIPT_VER              = "v1.4.0"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -74,7 +74,8 @@ var gLaunchLow      = false;    // Do generate low resolution image or not.
 var gExtensionStore = "tga";    //
 var gProcessBreak   = false;    //
 var gDisableOutside = false;    // When save, disable outside layer at first.
-var gAutoGenerateTx    = false;    // Make tx image after texture saved.
+var gAutoGenerateTx = false;    // Make tx image after texture saved.
+var gRemoveExif     = false;    // Remove exif information after texture saved.
 
 // GUI text info defined
 var TEXT_PATHS      = "path(s)",
@@ -84,19 +85,21 @@ var TEXT_PATHS      = "path(s)",
     TEXT_ORG_SIZE   = "Original",
     TEXT_HALF_SIZE  = "Half",
     TEXT_QUARTER_SIZE = "Quarter",
-    TEXT_WITH_LOW   = "With Low",
-    TEXT_BUILD_LOW  = "Building low-res image...",
-    TEXT_LOW_DONE   = "The low-res image is done!",
+    TEXT_WITH_LOW   = "Gen Low",
+    TEXT_BUILD_LOW  = "Building lowest resolution...",
+    TEXT_LOW_DONE   = "The lowest res image is done!",
     TEXT_OVERLAPPING= "Overlapping",
     TEXT_OVERRIDE   = "Override",
     TEXT_IGNORE_EXISTS = "Ignore Exists",
     TEXT_NEW_FILE   = "Saving a new image...",
     TEXT_INTERVAL   = "Intervals",
     TEXT_UNDERSCORE = "Underscore",
-    TEXT_MAKETX     = "maketx",
-    TEXT_DISABLE_OUTSIDE = "Dis Outside",
+    TEXT_MAKETX     = "Make tx",
+    TEXT_RMEXIF     = "Remove Exif",
+    TEXT_EXIF_INFO  = "Exif Information",
+    TEXT_DISABLE_OUTSIDE = "Hide Outsd",
     TEXT_DOT        = "Dot",
-    TEXT_VERSION    = "Suffixes || Gray Keywords",
+    TEXT_VERSION    = "Suffixes ----- Grayscale Keywords",
     TEXT_EXECUTE    = "Executions",
     TEXT_EXECUTE_VISIBLE = "Visible",
     TEXT_EXECUTE_ALL = "All Groups",
@@ -123,18 +126,26 @@ var TEXT_PATHS      = "path(s)",
     TEXT_IS_NOT_PSD = "This document is not a PSD file!",
     TEXT_NO_DOCUMENTS = "There have no any document!",
     HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
-    HELP_EXTENSION  = "Image format selections, TIF, TGA or JPG",
+    HELP_EXTENSION  = "Image formats, TIF, TGA or JPG. Make tx is optional.",
     HELP_RESIZE     = "Resize image after saving.",
     HELP_OVERLAPPING= "Overlapping exists file or skip.",
-    HELP_INTERVAL   = "Specific interval symbol between main and channel name.",
-    HELP_SUFFIXES   = "Suffixes and convert grayscale keywords.",
-    HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers";
+    HELP_INTERVAL   = "Specific interval symbol between main and group name.",
+    HELP_SUFFIXES   = "For the output images's suffix words.",
+    HELP_GRAYKEYWRD = "If keyword matched, It will convert grayscale after. sperate them by space.",
+    HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers.",
+    HELP_EXEC_VIS   = "Only visible groups would be save.",
+    HELP_EXEC_ALL   = "Save all layers.",
+    HELP_MAKE_TX    = "Auto generate arnold tx format image.",
+    HELP_RMEXIF     = "Remove EXIF information."
+    HELP_HIDE_OUTSD = "Hide outside layers before.",
+    HELP_COMPRESS   = "Compression image format.",
+    HELP_GEN_LOW    = "Auto generate a lowest version image additional.";
 
 // Main process execute
-Division();
+division();
 
 // Main function
-function Division()
+function division()
 {
     // If document is incorrect, terminate process.
     if(!activeDocumentCheck())
@@ -156,7 +167,7 @@ function divisionDialog()
 {
     // Main window
     var kGlobalPanelSize  = { width:280, height:46 };
-    var kGlobalButtonSize = { width:72 , height:24 };
+    var kGlobalButtonSize = { width:72, height:24 };
     var kGlobalEditTextSize = { width:80, height:22 };
     var kGlobalEditTextSize2= { width:150, height:22 };
     var kDialogProperties = {
@@ -181,7 +192,7 @@ function divisionDialog()
     } else {
         dlg.panelSavePaths.ddlA = dlg.panelSavePaths.add("DropDownList", undefined);
         dlg.panelSavePaths.ddlA.maximumSize = { width:250, height:24 };
-        for( i = 0 ; i < SAVE_PATHS.length ; i++ ) {
+        for(var i = 0 ; i < SAVE_PATHS.length ; i++) {
             dlg.panelSavePaths.ddlA.add( "item", SAVE_PATHS[i] );
         }
         dlg.panelSavePaths.text = i + " " + TEXT_PATHS;
@@ -247,8 +258,23 @@ function divisionDialog()
         "CheckBox", undefined, TEXT_MAKETX
     );
     dlg.panelExtensionOptions.cbA.value = gAutoGenerateTx;
+    dlg.panelExtensionOptions.cbA.helpTip = HELP_MAKE_TX;
     dlg.panelExtensionOptions.cbA.onClick = function() {
         gAutoGenerateTx = !gAutoGenerateTx;
+    };
+
+    //
+    dlg.panelExifInformation = dlg.add("panel", undefined, TEXT_EXIF_INFO);
+    dlg.panelExifInformation.size = kGlobalPanelSize;
+    dlg.panelExifInformation.alignChild = "left";
+    dlg.panelExifInformation.orientation = "row";
+    dlg.panelExifInformation.cbA = dlg.panelExifInformation.add(
+        "CheckBox", undefined, TEXT_RMEXIF
+    );
+    dlg.panelExifInformation.cbA.value = gRemoveExif;
+    dlg.panelExifInformation.cbA.helpTip = HELP_RMEXIF;
+    dlg.panelExifInformation.cbA.onClick = function() {
+        gRemoveExif = !gRemoveExif;
     };
 
     // Panel resize image options.
@@ -328,10 +354,12 @@ function divisionDialog()
         "EditText", undefined, gVersionAppend
     );
     dlg.panelVersionOptions.etA.preferredSize = kGlobalEditTextSize;
+    dlg.panelVersionOptions.etA.helpTip = HELP_SUFFIXES;
     dlg.panelVersionOptions.etB = dlg.panelVersionOptions.add(
         "EditText", undefined, gGrayKeyword
     );
     dlg.panelVersionOptions.etB.preferredSize = kGlobalEditTextSize2;
+    dlg.panelVersionOptions.etB.helpTip = HELP_GRAYKEYWRD;
     dlg.panelVersionOptions.etA.onChange = function() {
         if(isValidName(dlg.panelVersionOptions.etA.text)) {
             gVersionAppend = dlg.panelVersionOptions.etA.text;
@@ -349,16 +377,17 @@ function divisionDialog()
 
     // Main execution button.
     dlg.panelExecution = dlg.add("panel", undefined, TEXT_EXECUTE);
-    dlg.panelExecution.helpTip = HELP_COMMAND;
     dlg.panelExecution.size = kGlobalPanelSize;
     dlg.panelExecution.alignChild = "center";
     dlg.panelExecution.orientation = "row";
     dlg.panelExecution.btnA = dlg.panelExecution.add(
         "Button", undefined, TEXT_EXECUTE_VISIBLE
     );
+    dlg.panelExecution.btnA.helpTip = HELP_EXEC_VIS;
     dlg.panelExecution.btnB = dlg.panelExecution.add(
         "Button", undefined, TEXT_EXECUTE_ALL
     );
+    dlg.panelExecution.btnB.helpTip = HELP_EXEC_ALL;
     dlg.panelExecution.btnC = dlg.panelExecution.add(
         "Button", undefined, TEXT_CANCEL
     );
@@ -373,14 +402,17 @@ function divisionDialog()
     dlg.panelAdvanceOptions.cbA = dlg.panelAdvanceOptions.add(
         "CheckBox", undefined, TEXT_DISABLE_OUTSIDE
     );
+    dlg.panelAdvanceOptions.cbA.helpTip = HELP_HIDE_OUTSD;
     dlg.panelAdvanceOptions.cbA.value = gDisableOutside;
     dlg.panelAdvanceOptions.cbB = dlg.panelAdvanceOptions.add(
         "CheckBox", undefined, TEXT_COMPRESS
     );
+    dlg.panelAdvanceOptions.cbB.helpTip = HELP_COMPRESS;
     dlg.panelAdvanceOptions.cbB.value = gCompression;
     dlg.panelAdvanceOptions.cbC = dlg.panelAdvanceOptions.add(
         "CheckBox", undefined, TEXT_WITH_LOW
     );
+    dlg.panelAdvanceOptions.cbC.helpTip = HELP_GEN_LOW;
     dlg.panelAdvanceOptions.cbC.value = gLaunchLow;
     dlg.panelAdvanceOptions.cbA.onClick = function(){ gDisableOutside = !gDisableOutside; };
     dlg.panelAdvanceOptions.cbB.onClick = function(){ gCompression = !gCompression; };
@@ -473,7 +505,7 @@ function divisionMainProc(outputMode)
     // If disable outside is on, hide all outside layers.
     if (gDisableOutside)
     {
-        for (i = 0 ; i < curDoc.layers.length ; i++) {
+        for (var i = 0 ; i < curDoc.layers.length ; i++) {
             curDoc.layers[i].visible = false;
         }
     }
@@ -482,7 +514,7 @@ function divisionMainProc(outputMode)
     var saved_images = new Array();
 
     // Batch to save
-    for(i = 0 ; i < curDoc.layerSets.length ; i++) {
+    for(var i = 0 ; i < curDoc.layerSets.length ; i++) {
         var channel_name = curDoc.layerSets[i].name + gVersionAppend;
         if( !isValidName(channel_name) ) {
             rate.setInfo(channel_name + " " + TEXT_INVALID_NAME);
@@ -499,7 +531,7 @@ function divisionMainProc(outputMode)
         }
 
         // Switch off all layerSets visible without current layerSet index(i)
-        for( j = 0 ; j < curDoc.layerSets.length ; j++ ) {
+        for(var j = 0 ; j < curDoc.layerSets.length ; j++) {
             curDoc.layerSets[j].visible = ( j == i );
         }
 
@@ -535,7 +567,7 @@ function divisionMainProc(outputMode)
         var openType = getOpenOptions(gExtension);
 
         // Resize mode is 2 or 3 (half and Quad)
-        if( gResizeMode != 1 ) {
+        if(gResizeMode != 1) {
             rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END + TEXT_DO_RESIZE );
             try {
                 var workDoc = app.open(fileBuff, openType); //Open new document.
@@ -575,7 +607,7 @@ function divisionMainProc(outputMode)
         }
 
         // Generate low resolution image after save.
-        if( gLaunchLow )
+        if(gLaunchLow)
         {
             rate.setInfo(channel_name + " -> " + TEXT_BUILD_LOW);
             low_res_file_name = SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name
@@ -614,22 +646,31 @@ function divisionMainProc(outputMode)
         setLayerVisible(curDoc, visibleLayers);
     }
 
-    // Maketx after.
+    // Maketx
     if (gAutoGenerateTx)
     {
-        // Debug 
-        // for (i = 0 ; i < saved_images.length ; i++)
-        // {
-        //    alert(saved_images[i]);
-        // }
         var maketx_module = "" + File($.fileName).path + "/maketx.jsx";
         var maketx_file = new File(maketx_module);
         if (maketx_file.exists) {
             $.evalFile(maketx_file);
-            rate.setInfo("Make tx image");
             maketx(saved_images);
+            rate.setInfo("Make tx process...");
         } else {
             rate.setInfo("Maketx script not found.");
+        }
+    }
+
+    // Remove EXIF
+    if (gRemoveExif && gExtension == "tif")
+    {
+        var rmexif_module = "" + File($.fileName).path + "/exifutils.jsx";
+        var rmexif_file = new File(rmexif_module);
+        if (rmexif_file.exists) {
+            $.evalFile(rmexif_file);
+            remove_all_exif(saved_images);
+            rate.setInfo("Remove EXIF process...");
+        } else {
+            rate.setInfo("exifutil.jsx is not found.");
         }
     }
 
@@ -693,14 +734,14 @@ function getSavePathProc()
     var pathIsDuplicated = false;
 
     // Loop for search text-layers
-    for (i = 0 ; i < docLayers.length ; i++)
+    for (var i = 0 ; i < docLayers.length ; i++)
     {
         // Reset pathIsDuplicated notation
         pathIsDuplicated = false;
         if(docLayers[i].kind == LayerKind.TEXT)
         {
             // Check previous others if duplicated
-            for (j = workPaths.length-1 ; j >= 0 ; j--)
+            for (var j = workPaths.length-1 ; j >= 0 ; j--)
             {
                 if(docLayers[i].textItem.contents == workPaths[j])
                 {
@@ -793,6 +834,12 @@ function readingLog()
                 gAutoGenerateTx = true;
             else
                 gAutoGenerateTx = false;
+        case "remove_exif":
+            if (value == "true" || value == "1")
+                gRemoveExif = true;
+            else
+                gRemoveExif = false;
+            break;
         }
     }
     log.close(); 
@@ -818,6 +865,7 @@ function writeLog()
         log.writeln("resize_mode = " + gResizeMode);
         log.writeln("disable_outside = " + gDisableOutside);
         log.writeln("maketx = " + gAutoGenerateTx);
+        log.writeln("remove_exif = " + gRemoveExif);
     } catch(e) {
         alert(e, UI_TITLE + SCRIPT_VER);
         stat = false;
@@ -832,7 +880,8 @@ function getLayerSetVisible(workDoc)
 {
     gNumVisible = 0;
     var visibleLayerSets = [];
-    for ( i = 0 ; i < workDoc.layerSets.length ; i++ ) {
+    for (var i = 0 ; i < workDoc.layerSets.length ; i++) 
+    {
         visibleLayerSets.push(workDoc.layerSets[i].visible);
         if(visibleLayerSets[i]) 
         {
@@ -846,7 +895,8 @@ function getLayerVisible(workDoc)
 {
     gLayNumVisible = 0;
     var visibleLayers = [];
-    for ( i=0 ; i < workDoc.layers.length ; i++ ) {
+    for (var i = 0 ; i < workDoc.layers.length ; i++)
+    {
         visibleLayers.push(workDoc.layers[i].visible);
         if (visibleLayers[i]) gLayNumVisible++;
     }
@@ -855,7 +905,7 @@ function getLayerVisible(workDoc)
 
 function setLayerSetVisible(workDoc, visible)
 {
-    for ( i = 0 ; i < workDoc.layerSets.length ; i++)
+    for (var i = 0 ; i < workDoc.layerSets.length ; i++)
     {
         workDoc.layerSets[i].visible = visible[i];
     }
@@ -863,7 +913,7 @@ function setLayerSetVisible(workDoc, visible)
 
 function setLayerVisible(workDoc, visible)
 {
-    for (i=0 ; i<workDoc.layers.length ; i++)
+    for (var i = 0 ; i < workDoc.layers.length ; i++)
     {
         workDoc.layers[i].visible = visible[i];
     }
@@ -931,7 +981,7 @@ function isValidName(name)
 function isIncludedGrayscale(channel)
 {
     var keywords = gGrayKeyword.split(" ");
-    for( keyword_index in keywords)
+    for(var keyword_index in keywords)
     {
         if(channel == keywords[keyword_index])
             return true;
@@ -954,9 +1004,9 @@ function progressRateBar(max)
     this.pr.plane.size = { width:280, height:120 };
     this.pr.plane.alignChild = "column";
     this.pr.plane.info = this.pr.plane.add("staticText", undefined, TEXT_START);
-    this.pr.plane.info.minimumSize = {width:240, height:28};
+    this.pr.plane.info.minimumSize = { width:240, height:28 };
     this.pr.plane.rate = this.pr.plane.add("Progressbar", undefined);
-    this.pr.plane.rate.size = {width:240, height:16};
+    this.pr.plane.rate.size = { width:240, height:16 };
     this.pr.plane.rate.maxvalue = max;
 
     this.pr.onClose = function(){ 
