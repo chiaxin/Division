@@ -47,3 +47,5 @@ function remove_all_exif(images)
     }
     return true;
 }
+
+// exifutils.jsx

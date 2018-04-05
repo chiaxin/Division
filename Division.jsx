@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.4.0
+//    Version : 1.4.1
 //
-//    Last update : 2018-04-04
+//    Last update : 2018-04-05
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -35,7 +35,7 @@ var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is upper
 var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
 var SAVE_PATH               = ""                    ; // Default save path.
 var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.4.0"              ; // Version.
+var SCRIPT_VER              = "v1.4.1"              ; // Version.
 var ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -63,6 +63,7 @@ var SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script fold
 var gImagePixel     = 72;       // Document's pixel. The default is 72.
 var gCompression    = true;     // Compression image option.
 var gGrayKeyword    = "";       // The keyword(s) define gray image.
+var gResampleMethod = ResampleMethod.BICUBIC;
 var gNumVisible     = 0;        //
 var gLayNumVisible  = 0;        //
 var gVersionAppend  = "";       // Indicate the version string suffix.
@@ -125,6 +126,11 @@ var TEXT_PATHS      = "path(s)",
     TEXT_NO_ANY_VISIBLE = "Do \"Visible\" must have one group visible at least!",
     TEXT_IS_NOT_PSD = "This document is not a PSD file!",
     TEXT_NO_DOCUMENTS = "There have no any document!",
+    TEXT_PROC_TERM  = "Process has been terminated",
+    TEXT_MAKETX_PROC= "Make tx process...",
+    TEXT_MAKETX_NF  = "maketx.jsx was not found.",
+    TEXT_RMEXIF_PROC= "Remove EXIF process...",
+    TEXT_EXIFUT_NF  = "exifutil.jsx was not found.",
     HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
     HELP_EXTENSION  = "Image formats, TIF, TGA or JPG. Make tx is optional.",
     HELP_RESIZE     = "Resize image after saving.",
@@ -155,7 +161,7 @@ function division()
     SAVE_PATHS = getSavePathProc(); // Get all path(s) need to save.
     SAVE_PATH = SAVE_PATHS[0]; // Default save path.
     
-    if(!readingLog()) writeLog();
+    if(readingLog() === false) writeLog();
 
     if(!SAVE_PATHS) return false; 
 
@@ -185,7 +191,7 @@ function divisionDialog()
     dlg.panelSavePaths.orientation = "column";
     // If we not provide any path(s), It will assume we want to save to same path with document.
     // And if we provide multi path, it will show drop-down-list UI for choose.
-    if( SAVE_PATHS.length == 1 && SAVE_PATHS[0] == app.activeDocument.path.fsName ) {
+    if (SAVE_PATHS.length == 1 && SAVE_PATHS[0] == app.activeDocument.path.fsName) {
         dlg.panelSavePaths.stA = dlg.panelSavePaths.add("StaticText", undefined);
         dlg.panelSavePaths.stA.text = TEXT_SAME_AS;
         SAVE_PATH = SAVE_PATHS[0];
@@ -193,7 +199,7 @@ function divisionDialog()
         dlg.panelSavePaths.ddlA = dlg.panelSavePaths.add("DropDownList", undefined);
         dlg.panelSavePaths.ddlA.maximumSize = { width:250, height:24 };
         for(var i = 0 ; i < SAVE_PATHS.length ; i++) {
-            dlg.panelSavePaths.ddlA.add( "item", SAVE_PATHS[i] );
+            dlg.panelSavePaths.ddlA.add("item", SAVE_PATHS[i]);
         }
         dlg.panelSavePaths.text = i + " " + TEXT_PATHS;
         dlg.panelSavePaths.ddlA.helpTip = HELP_SAVE_PATH;
@@ -445,160 +451,174 @@ function divisionDialog()
 }
 
 // Main function:
-function divisionMainProc(outputMode)
+function divisionMainProc(is_output_all)
 {
-    var defaultRulerUnits = app.preferences.rulerUnits; // Get now ruler units.
-    app.preferences.rulerUnits = Units.PIXELS; // Set ruler to "Pixel".
-    var curDoc = app.activeDocument; // Get current document.
+    // Get now ruler units.
+    var default_ruler_units = app.preferences.rulerUnits; 
+    // Set ruler to "Pixel".
+    app.preferences.rulerUnits = Units.PIXELS; 
+    // Get current document.
+    var curr_doc = app.activeDocument;
+    // Get resolution pixel.
+    gImagePixel = curr_doc.resolution;
 
-    gImagePixel = curDoc.resolution; // Get resolution pixel.
-
-    //Get header name from this document.
-    var primaryName = curDoc.name.replace(("."+curDoc.name.split(".").pop()), "");
+    //Get main name from this document.
+    var main_str = curr_doc.name.replace(("."+curr_doc.name.split(".").pop()), "");
 
     // Resize height and width calculation.
     switch(gResizeMode)
     {
     case 1:
-        var resizeHeight = curDoc.height;
-        var resizeWidth  = curDoc.width;
+        var resize_height = curr_doc.height;
+        var resize_width  = curr_doc.width;
         break;
     case 2:
-        var resizeHeight = Math.floor(curDoc.height/2); //Scale half.
-        var resizeWidth  = Math.floor(curDoc.width /2);
+        var resize_height = Math.floor(curr_doc.height/2);
+        var resize_width  = Math.floor(curr_doc.width /2);
         break;
     case 3:
-        var resizeHeight = Math.floor(curDoc.height/4); //Scale quad.
-        var resizeWidth  = Math.floor(curDoc.width /4);
+        var resize_height = Math.floor(curr_doc.height/4);
+        var resize_width  = Math.floor(curr_doc.width /4);
         break;
     default:
-        var resizeHeight = curDoc.height;
-        var resizeWidth  = curDoc.width
+        var resize_height = curr_doc.height;
+        var resize_width  = curr_doc.width
     }
-    var saveOption = getSaveOptions(gExtension);
-    var visibleLayerSets = getLayerSetVisible(curDoc);
-    var visibleLayers = getLayerVisible(curDoc);
 
-    // If do visible layer-sets only with all invisible, warning and quit.
-    if( !gNumVisible && !outputMode ) {
-        alert( TEXT_NO_ANY_VISIBLE, UI_TITLE + SCRIPT_VER );
+    // Get Photoshop save options.
+    var save_option = getSaveOptions(gExtension);
+    // Get visible layerSets.
+    var visible_layer_sets = getLayerSetVisible(curr_doc);
+    // Get visible layers.
+    var visible_layers = getLayerVisible(curr_doc);
+
+    // If do visible layerSets only and they are invisible, warning and quit.
+    if(gNumVisible === 0 && is_output_all === false) {
+        alert(TEXT_NO_ANY_VISIBLE, UI_TITLE + SCRIPT_VER);
         return false;
     }
 
+    // Define rate number.
     var rate_multi = 1;
-    if( gResizeMode != 1 ) rate_multi += 1;
-    if( gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE ) rate_multi += 1;
-    if( gLaunchLow ) rate_multi += 1;
+    if (gResizeMode != 1) rate_multi++;
+    if (gGrayKeyword != "" && curr_doc.mode != DocumentMode.GRAYSCALE) rate_multi++;
+    if (gLaunchLow) rate_multi++;
 
-    // If output mode is true ( all output ) rate max is number of layer-sets.
-    // else it will be number of visible layer-sets.
-    if( outputMode ) {
-        var rate = new progressRateBar( curDoc.layerSets.length * rate_multi );
+    // In output all, rate max is number of layer-sets,
+    // Else it will be number of visible layer-sets.
+    if (is_output_all === true) {
+        var rate = new progressRateBar(curr_doc.layerSets.length * rate_multi);
     } else {
-        var rate = new progressRateBar( gNumVisible * rate_multi );
+        var rate = new progressRateBar(gNumVisible * rate_multi);
     }
 
+    // Show rate.
     rate.show();
-    var numberOfSuccess = 0;
-    var numberOfGrayscale = 0;
+    var number_of_success = 0;
+    var number_of_grayscale = 0;
 
     // If disable outside is on, hide all outside layers.
     if (gDisableOutside)
     {
-        for (var i = 0 ; i < curDoc.layers.length ; i++) {
-            curDoc.layers[i].visible = false;
+        for (var i = 0 ; i < curr_doc.layers.length ; i++) {
+            curr_doc.layers[i].visible = false;
         }
     }
     
-    // Store saved images for maketx.
+    // Store saved images for maketx and remove exif.
     var saved_images = new Array();
 
-    // Batch to save
-    for(var i = 0 ; i < curDoc.layerSets.length ; i++) {
-        var channel_name = curDoc.layerSets[i].name + gVersionAppend;
-        if( !isValidName(channel_name) ) {
-            rate.setInfo(channel_name + " " + TEXT_INVALID_NAME);
-            rate.plus( rate_multi );
+    // Loop for each layerSets.
+    for (var i = 0 ; i < curr_doc.layerSets.length ; i++) {
+        // The secondary name is layerSet's name with suffix.
+        var secondary_str = curr_doc.layerSets[i].name + gVersionAppend;
+        if (isValidName(secondary_str) === false) {
+            // This secondary name is invalid, ignore.
+            rate.setInfo(secondary_str + " " + TEXT_INVALID_NAME);
+            rate.plus(rate_multi);
             continue;
-        } else if( !visibleLayerSets[i] && !outputMode ) {
+        } else if (visible_layer_sets[i] === false && is_output_all === false) {
+            // This layerSet is invisible, and is not output all, ignore.
             continue;
-        } else if( !curDoc.layerSets[i].artLayers.length ) {
+        } else if (curr_doc.layerSets[i].artLayers.length === 0) {
+            // This layerSet have no any layers, ignore.
             rate.setInfo(
-                TEXT_PARENT_START + curDoc.layerSets[i].name + TEXT_PARENT_END + TEXT_EMPTY_SKIP 
+                TEXT_PARENT_START + curr_doc.layerSets[i].name + TEXT_PARENT_END + TEXT_EMPTY_SKIP 
             );
             rate.plus(rate_multi);
             continue;
         }
 
-        // Switch off all layerSets visible without current layerSet index(i)
-        for(var j = 0 ; j < curDoc.layerSets.length ; j++) {
-            curDoc.layerSets[j].visible = ( j == i );
+        // Turn off all layerSets visible without current layerSet index(i).
+        for(var j = 0 ; j < curr_doc.layerSets.length ; j++) {
+            curr_doc.layerSets[j].visible = ( j == i );
         }
 
         // Prepare file path
-        rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END );
-        var full_export_name = SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name + "." + gExtension;
-        var fileBuff = new File(full_export_name);
+        rate.setInfo(TEXT_PARENT_START + secondary_str + TEXT_PARENT_END);
+        var full_export_name = SAVE_PATH + "/" + main_str + gIntervalSymbol 
+                             + secondary_str + "." + gExtension;
+        var img_file_fh = new File(full_export_name);
 
         //If gOverlapping is off and file exists.skip it.
         //Otherwise override it, create new one if not exists.
-        if( fileBuff.exists && gOverlapping == false ) {
+        if(img_file_fh.exists && gOverlapping == false) {
             rate.setInfo(TEXT_FILE_EXISTS);
             rate.plus(rate_multi);
             continue;
-        } else if( fileBuff.exists ) {
+        } else if(img_file_fh.exists) {
             rate.setInfo( TEXT_DO_OVERRIDE );
         } else {
-            rate.setInfo( TEXT_NEW_FILE );
+            rate.setInfo(TEXT_NEW_FILE);
         }
 
         // Try to save image if any unexception error occur, quit this process.
         try {
-            curDoc.saveAs(fileBuff, saveOption, true, EXTENSION_CASE); //Saving image.
+            curr_doc.saveAs(img_file_fh, save_option, true, EXTENSION_CASE);
             saved_images.push(full_export_name);
             rate.plus(1);
         } catch(e) {
-            alert( e, UI_TITLE + " " + SCRIPT_VER );
-            delete fileBuff, rate;
+            alert(e, UI_TITLE + " " + SCRIPT_VER);
+            delete img_file_fh, rate;
             return false;
         }
-        numberOfSuccess++; // When success the number plus one.
+        number_of_success++; // When success the number plus one.
 
         var openType = getOpenOptions(gExtension);
 
-        // Resize mode is 2 or 3 (half and Quad)
+        // Resize image if mode number is 2 or 3 (half and Quad).
         if(gResizeMode != 1) {
-            rate.setInfo( TEXT_PARENT_START + channel_name + TEXT_PARENT_END + TEXT_DO_RESIZE );
+            rate.setInfo(TEXT_PARENT_START + secondary_str + TEXT_PARENT_END + TEXT_DO_RESIZE);
             try {
-                var workDoc = app.open(fileBuff, openType); //Open new document.
-                app.activeDocument = workDoc; //Setting work document active.
-                while(workDoc.height.value != resizeHeight)
+                var work_doc = app.open(img_file_fh, openType); //Open new document.
+                app.activeDocument = work_doc; //Setting work document active.
+                while(work_doc.height.value != resize_height)
                 {
-                    workDoc.resizeImage(resizeWidth, resizeHeight, gImagePixel);
+                    work_doc.resizeImage(resize_width, resize_height, gImagePixel, gResampleMethod);
                 }
-                workDoc.close(SaveOptions.SAVECHANGES); // Close with save.
-                app.activeDocument = curDoc;            // Focus previous document.
+                work_doc.close(SaveOptions.SAVECHANGES); // Close with save changes.
+                app.activeDocument = curr_doc; // Focus previous document.
             } catch(e) {
                 alert(e);
             }
             rate.plus(1);
         }
 
-        // Convert to grayscale mode
-        if(gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE)
+        // Convert to grayscale.
+        if(gGrayKeyword != "" && curr_doc.mode != DocumentMode.GRAYSCALE)
         {
-            rate.setInfo( channel_name + " -> " + TEXT_ANALYSIS );
-            if( isIncludedGrayscale(curDoc.layerSets[i].name) ) {
-                var workDoc = app.open(fileBuff, openType);
-                app.activeDocument = workDoc;
+            rate.setInfo(secondary_str + " -> " + TEXT_ANALYSIS);
+            if(isIncludedGrayscale(curr_doc.layerSets[i].name)) {
+                var work_doc = app.open(img_file_fh, openType);
+                app.activeDocument = work_doc;
                 try {
-                    workDoc.changeMode(ChangeMode.GRAYSCALE);
-                    workDoc.close(SaveOptions.SAVECHANGES);
-                    numberOfGrayscale++;
+                    work_doc.changeMode(ChangeMode.GRAYSCALE);
+                    work_doc.close(SaveOptions.SAVECHANGES);
+                    number_of_grayscale++;
                 } catch(e) {
                     alert(e, UI_TITLE+SCRIPT_VER);
                 }
-                app.activeDocument = curDoc;
+                app.activeDocument = curr_doc;
                 rate.setInfo(TEXT_DO_GRAY);
             } else {
                 rate.setInfo(TEXT_SKIP_GRAY);
@@ -606,44 +626,44 @@ function divisionMainProc(outputMode)
             rate.plus(1);
         }
 
-        // Generate low resolution image after save.
+        // Generate low resolution image after saved.
         if(gLaunchLow)
         {
-            rate.setInfo(channel_name + " -> " + TEXT_BUILD_LOW);
-            low_res_file_name = SAVE_PATH + "/" + primaryName + gIntervalSymbol + channel_name
+            rate.setInfo(secondary_str + " -> " + TEXT_BUILD_LOW);
+            var low_res_file_name = SAVE_PATH + "/" + main_str + gIntervalSymbol + secondary_str
                 + LOW_SUFFIX + "." + gExtension;
-            low_res_file = new File(low_res_file_name);
-            var low_res_width = Math.floor(resizeWidth / LOW_RATIO);
-            var low_res_height= Math.floor(resizeHeight/ LOW_RATIO);
-            var workDoc = app.open( fileBuff, openType );
-            app.activeDocument = workDoc;
+            var low_res_file = new File(low_res_file_name);
+            var low_res_width = Math.floor(resize_width / LOW_RATIO);
+            var low_res_height= Math.floor(resize_height/ LOW_RATIO);
+            var work_doc = app.open(img_file_fh, openType);
+            app.activeDocument = work_doc;
             try {
-                workDoc.resizeImage( low_res_width, low_res_height, gImagePixel );
-                workDoc.saveAs( low_res_file, saveOption, false, EXTENSION_CASE );
-                workDoc.close( SaveOptions.DONOTSAVECHANGES );
+                work_doc.resizeImage(low_res_width, low_res_height, gImagePixel);
+                work_doc.saveAs(low_res_file, save_option, false, EXTENSION_CASE);
+                work_doc.close(SaveOptions.DONOTSAVECHANGES);
                 saved_images.push(low_res_file_name);
             } catch(e) {
-                alert(e, UI_TITLE + " " + SCRIPT_VER );
+                alert(e, UI_TITLE + " " + SCRIPT_VER);
             }
-            rate.setInfo( channel_name + " -> " + TEXT_LOW_DONE );
-            app.activeDocument = curDoc;
+            rate.setInfo(secondary_str + " -> " + TEXT_LOW_DONE);
+            app.activeDocument = curr_doc;
             delete low_res_file;
             rate.plus(1);
         }
-        delete fileBuff;
+        delete img_file_fh;
 
         if(gProcessBreak) {
-            alert( "Process has been terminated", UI_TITLE);
+            alert(TEXT_PROC_TERM, UI_TITLE);
             break;
         }
     }
     // Recover original layerSet visible status.
-    setLayerSetVisible( curDoc, visibleLayerSets );
+    setLayerSetVisible(curr_doc, visible_layer_sets);
    
     // Recover outside layer visible status if disable outside is launch.
     if (gDisableOutside)
     {
-        setLayerVisible(curDoc, visibleLayers);
+        setLayerVisible(curr_doc, visible_layers);
     }
 
     // Maketx
@@ -654,9 +674,9 @@ function divisionMainProc(outputMode)
         if (maketx_file.exists) {
             $.evalFile(maketx_file);
             maketx(saved_images);
-            rate.setInfo("Make tx process...");
+            rate.setInfo(MAKE_PROC);
         } else {
-            rate.setInfo("Maketx script not found.");
+            rate.setInfo(MAKETX_NF);
         }
     }
 
@@ -668,18 +688,18 @@ function divisionMainProc(outputMode)
         if (rmexif_file.exists) {
             $.evalFile(rmexif_file);
             remove_all_exif(saved_images);
-            rate.setInfo("Remove EXIF process...");
+            rate.setInfo(TEXT_RMEXIF_PROC);
         } else {
-            rate.setInfo("exifutil.jsx is not found.");
+            rate.setInfo(TEXT_EXIFUT_NF);
         }
     }
 
     // Tell user how many images is saved, then close rate window.
     if(!gProcessBreak)
     {
-        var result_report = numberOfSuccess + TEXT_COMPLETED;
-        if(gGrayKeyword != "" && curDoc.mode != DocumentMode.GRAYSCALE) {
-            result_report += (", " + numberOfGrayscale + TEXT_GRAY_INFO);
+        var result_report = number_of_success + TEXT_COMPLETED;
+        if(gGrayKeyword != "" && curr_doc.mode != DocumentMode.GRAYSCALE) {
+            result_report += (", " + number_of_grayscale + TEXT_GRAY_INFO);
         } else {
             result_report += ".";
         }
@@ -689,35 +709,35 @@ function divisionMainProc(outputMode)
         rate.close();
     }
     delete rate;
-    app.preferences.rulerUnits = defaultRulerUnits;
+    app.preferences.rulerUnits = default_ruler_units;
 }
 
 // Check Active-Document legal.
 function activeDocumentCheck()
 {
-    if ( app.documents.length == 0 )
+    if (app.documents.length === 0)
     {
         alert(TEXT_NO_DOCUMENTS, UI_TITLE+SCRIPT_VER);
         return false;
     }
     try {
-        var curDoc = app.activeDocument;
+        var curr_doc = app.activeDocument;
     } catch(e) {
         alert(e, UI_TITLE+SCRIPT_VER);
         return false;
     }
-    if (curDoc.name.split(".").pop().toLowerCase() != "psd")
+    if (curr_doc.name.split(".").pop().toLowerCase() != "psd")
     {
         alert(TEXT_IS_NOT_PSD, UI_TITLE+SCRIPT_VER);
         return false;
     } 
     try {
-        var docPath = curDoc.path;
+        var docPath = curr_doc.path;
     } catch(e) {
         alert(e, UI_TITLE+SCRIPT_VER);
         return false;
     }
-    if (curDoc.layerSets.length == 0)
+    if (curr_doc.layerSets.length === 0)
     {
         alert(TEXT_NO_LAYER, UI_TITLE+SCRIPT_VER);
         return false;
@@ -730,41 +750,41 @@ function getSavePathProc()
     // Get this document all artLayers
     var docLayers = app.activeDocument.artLayers;
     var path = null;
-    var workPaths = [];
-    var pathIsDuplicated = false;
+    var work_paths = [];
+    var path_is_duplicated = false;
 
     // Loop for search text-layers
     for (var i = 0 ; i < docLayers.length ; i++)
     {
-        // Reset pathIsDuplicated notation
-        pathIsDuplicated = false;
+        // Reset path_is_duplicated notation
+        path_is_duplicated = false;
         if(docLayers[i].kind == LayerKind.TEXT)
         {
             // Check previous others if duplicated
-            for (var j = workPaths.length-1 ; j >= 0 ; j--)
+            for (var j = work_paths.length-1 ; j >= 0 ; j--)
             {
-                if(docLayers[i].textItem.contents == workPaths[j])
+                if(docLayers[i].textItem.contents == work_paths[j])
                 {
-                    pathIsDuplicated = true;
+                    path_is_duplicated = true;
                     break;
                 }
             }
-            if(pathIsDuplicated) // If duplicated then skip.
+            if(path_is_duplicated) // If duplicated then skip.
                 continue;
             var path = new Folder(docLayers[i].textItem.contents);
             if(path.exists)
             {
-                workPaths.push(docLayers[i].textItem.contents);
+                work_paths.push(docLayers[i].textItem.contents);
             }
         }
     }
     delete path;
     // If not any paths to work, let only path is same as PSD.
-    if(workPaths.length == 0)
+    if(work_paths.length === 0)
     {
-        workPaths.push(app.activeDocument.path.fsName);
+        work_paths.push(app.activeDocument.path.fsName);
     }
-    return workPaths;
+    return work_paths;
 }
 
 function readingLog()
@@ -876,46 +896,46 @@ function writeLog()
     return stat;
 }
 
-function getLayerSetVisible(workDoc)
+function getLayerSetVisible(work_doc)
 {
     gNumVisible = 0;
-    var visibleLayerSets = [];
-    for (var i = 0 ; i < workDoc.layerSets.length ; i++) 
+    var visible_layer_sets = [];
+    for (var i = 0 ; i < work_doc.layerSets.length ; i++) 
     {
-        visibleLayerSets.push(workDoc.layerSets[i].visible);
-        if(visibleLayerSets[i]) 
+        visible_layer_sets.push(work_doc.layerSets[i].visible);
+        if(visible_layer_sets[i]) 
         {
             gNumVisible++;
         }
     }
-    return visibleLayerSets;
+    return visible_layer_sets;
 }
 
-function getLayerVisible(workDoc)
+function getLayerVisible(work_doc)
 {
     gLayNumVisible = 0;
-    var visibleLayers = [];
-    for (var i = 0 ; i < workDoc.layers.length ; i++)
+    var visible_layers = [];
+    for (var i = 0 ; i < work_doc.layers.length ; i++)
     {
-        visibleLayers.push(workDoc.layers[i].visible);
-        if (visibleLayers[i]) gLayNumVisible++;
+        visible_layers.push(work_doc.layers[i].visible);
+        if (visible_layers[i]) gLayNumVisible++;
     }
-    return visibleLayers;
+    return visible_layers;
 }
 
-function setLayerSetVisible(workDoc, visible)
+function setLayerSetVisible(work_doc, visible)
 {
-    for (var i = 0 ; i < workDoc.layerSets.length ; i++)
+    for (var i = 0 ; i < work_doc.layerSets.length ; i++)
     {
-        workDoc.layerSets[i].visible = visible[i];
+        work_doc.layerSets[i].visible = visible[i];
     }
 }
 
-function setLayerVisible(workDoc, visible)
+function setLayerVisible(work_doc, visible)
 {
-    for (var i = 0 ; i < workDoc.layers.length ; i++)
+    for (var i = 0 ; i < work_doc.layers.length ; i++)
     {
-        workDoc.layers[i].visible = visible[i];
+        work_doc.layers[i].visible = visible[i];
     }
 }
 
@@ -992,11 +1012,12 @@ function isIncludedGrayscale(channel)
 function progressRateBar(max)
 {
     var properties = { 
-        maximizeButton:false, 
-        minimizeButton:false, 
-        borderless:false, 
-        resizeable:false
+        maximizeButton : false, 
+        minimizeButton : false, 
+        borderless : false, 
+        resizeable : false
     };
+    
     this.pr = new Window("window", TEXT_PROCESSING, undefined, properties);
     this.pr.active = true;
     this.pr.orientation = "column";
@@ -1009,27 +1030,26 @@ function progressRateBar(max)
     this.pr.plane.rate.size = { width:240, height:16 };
     this.pr.plane.rate.maxvalue = max;
 
-    this.pr.onClose = function(){ 
+    // Events
+    this.pr.onClose = function() { 
         gProcessBreak = true;
     };
 
     // Methods
-    this.setInfo = function(text)
-    {
+    this.setInfo = function(text) {
         this.pr.plane.info.text = text;
         app.refresh();
     }
-    this.plus = function(step)
-    {
+    this.plus = function(step) {
         this.pr.plane.rate.value += step;
     }
-    this.show = function()
-    {
+    this.show = function() {
         this.pr.show();
     }
-    this.close = function()
-    {
+    this.close = function() {
         this.pr.close(0);
         delete this.pr;
     }
 }
+
+// Division.jsx
