@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
 //
-//  maketx module
+//  makedds module
 //
 // ---------------------------------------------------------------------------
-//
-const common_module = "" + File($.fileName).path + "/common.jsx";
-var common_file = new File(common_module);
+
+// Loading common script.
+const common_file = new File("" + File($.fileName).path + "/common.jsx");
 if (common_file.exists) {
     $.evalFile(common_file);
 }
@@ -25,9 +25,9 @@ function makedds(images)
         return -1;
     }
     var bin = "texconv.exe",
-        args= "",
-        default_format = "-f BC7_UNORM_SRGB",
-        normal_map_format = "-f BC5_SNORM",
+        args= "-ft DDS",
+        default_format = "-f BC7_UNORM_SRGB -srgbi",
+        normal_map_format = "-f BC5_UNORM",
         alpha = "-aw 0.0";
     try {
         config.open("r");
@@ -78,31 +78,24 @@ function makedds(images)
             var base_name = basename(image);
             var cmd = "";
             if (has_keyword(base_name, normal_map_keyword)) {
-                cmd = join(
-                    [
-                        bat_command, 
-                        "-o",
-                        qw(output_path),
-                        normal_map_format,
-                        image
-                    ]
-                );
+                cmd = join([bat_command, 
+                            "-o",
+                            qw(output_path),
+                            normal_map_format,
+                            image
+                           ]);
             } else {
-                cmd = join(
-                    [
-                        bat_command, 
-                        "-o",
-                        qw(output_path),
-                        alpha,
-                        default_format,
-                        image
-                    ]
-                );
+                cmd = join([bat_command, 
+                            "-o",
+                            qw(output_path),
+                            default_format,
+                            image
+                           ]);
             }
             bat_fh.writeln(cmd);
         }
         if (!bat_fh.execute()) {
-            alert("Convert dds file failed.");
+            alert("Convert dds process is failed.");
         }
     } catch (e) {
         alert(e);

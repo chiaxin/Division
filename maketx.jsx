@@ -3,20 +3,18 @@
 //  maketx module
 //
 // ---------------------------------------------------------------------------
-//
-var common_module = "" + File($.fileName).path + "/common.jsx";
-var common_file = new File(common_module);
-if (common_file.exists)
-{
+
+// Loading common script.
+const common_file = new File("" + File($.fileName).path + "/common.jsx");
+if (common_file.exists) {
     $.evalFile(common_file);
 }
-else
-{
+else {
     alert("common.jsx is not eixsts.");
 }
 
-var MAKETX_CONFIG_FILE = "/txConfig.txt";
-var GENERATE_TX_TEMP_BAT = "/division_generate_tx.bat";
+const MAKETX_CONFIG_FILE = "/txConfig.txt";
+const GENERATE_TX_TEMP_BAT = "/division_generate_tx.bat";
 
 function maketx(images)
 {
@@ -65,32 +63,46 @@ function maketx(images)
     } finally {
         config.close();
     }
-    var bat_command = join([qw(bin), maketx_arguments, "--colorengine", "syncolor",
-                      "--colorconfig", qw(colorconfig)]);
+    var bat_command = join([qw(bin), 
+                            maketx_arguments, 
+                            "--colorengine", 
+                            "syncolor",
+                            "--colorconfig", 
+                            qw(colorconfig)
+                           ]);
     var temp_folder = get_temp_folder();
     var bat_file = win_path(temp_folder + GENERATE_TX_TEMP_BAT);
-    var bat_fh = new File(bat_file);
+    var file_handle = new File(bat_file);
     try {
-        bat_fh.open('w');
-        bat_fh.writeln("@echo off");
-        for (var img_id = 0 ; img_id < images.length ; img_id++)
-        {
-            var image = win_path(images[img_id]);
+        file_handle.open('w');
+        file_handle.writeln("@echo off");
+        for (var idx = 0 ; idx < images.length ; idx++) {
+            var image = win_path(images[idx]);
             var image_color_space = default_color_profile;
             if (has_keyword(image, srgb))
                 image_color_space = "sRGB";
             else if (has_keyword(image, raw))
                 image_color_space = "Raw";
-            image_color_space = join(["--colorconvert", image_color_space, qw(colorspace)]);
+            image_color_space = join(["--colorconvert", 
+                                      image_color_space, 
+                                      qw(colorspace)
+                                     ]);
             var output_path = temp_folder + "\\" + basename(image) + ".tx";
-            var make_cmd = join([bat_command, "-o", qw(output_path), image_color_space, qw(image)]);
-            var copy_cmd = join(["xcopy /Y", qw(output_path), qw(dirname(image))]);
-            bat_fh.writeln(make_cmd);
-            bat_fh.writeln(copy_cmd);
+            var make_tx_command = join([bat_command, 
+                                        "-o", 
+                                        qw(output_path), 
+                                        image_color_space, 
+                                        qw(image)
+                                       ]);
+            var copy_img_command = join(["xcopy /Y", 
+                                         qw(output_path), 
+                                         qw(dirname(image))
+                                        ]);
+            file_handle.writeln(make_tx_command);
+            file_handle.writeln(copy_img_command);
         }
-        if (!bat_fh.execute())
-        {
-            alert("Make tx failed.");
+        if (!file_handle.execute()) {
+            alert("Make tx process is failed.");
         }
     } catch (e) {
         alert(e);

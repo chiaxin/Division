@@ -33,7 +33,7 @@ const COLOR_PROFILE_EMBED     = false                 ; // The Color-profile emb
 const ALPHA_CHANNEL_KEEP      = false                 ; // The Alpha channel keep or not.
 const EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
 const UI_TITLE                = "Division by Chiaxin "; // Window title.
-const SCRIPT_VER            = "v1.5.0"            ; // Version.
+const SCRIPT_VER              = "v1.5.0"            ; // Version.
 const ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
@@ -49,13 +49,16 @@ const JPEG_FORMAT = FormatOptions.STANDARDBASELINE    ; // JPEG format.
 const JPEG_SAVE_QUALITY       = 12                    ; // JPEG compression quality.
 const JPEG_MATTE_TYPE         = MatteType.SEMIGRAY    ; // JPEG matte type.
 
+// Resample method
+const RESAMPLE_METHOD = ResampleMethod.BICUBIC;
+
 // TGA Format
 const TGA_PER_PIXELS = TargaBitsPerPixels.TWENTYFOUR  ; // TGA format (24 bits).
 
 // The log file would be pre-reading, If not exists, it will try to build a new file.
-const SCRIPT_NAME     = "Division.jsx"                        ; // The local script name.
-const LOG_NAME        = "DivisionLog.txt"                     ; // The log txt.
-const SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script folder.
+const SCRIPT_NAME     = "Division.jsx"                ; // The local script name.
+const LOG_NAME        = "DivisionLog.txt"             ; // The log txt.
+const SCRIPT_FOLDER   = File($.fileName).path         ; // The script folder.
 
 // Global variables
 var gSavePaths      = [];       // Get all path(s) need to save.
@@ -63,7 +66,6 @@ var gDefaultSavePath= "";       // Default save path.
 var gImagePixel     = 72;       // Document's pixel. The default is 72.
 var gCompression    = true;     // Compression image option.
 var gGrayKeyword    = "";       // The keyword(s) define gray image.
-var gResampleMethod = ResampleMethod.BICUBIC;
 var gNumVisible     = 0;        //
 var gLayNumVisible  = 0;        //
 var gVersionAppend  = "";       // Indicate the version string suffix.
@@ -130,7 +132,9 @@ const   TEXT_PATHS      = "path(s)",
         TEXT_NO_DOCUMENTS = "There have no any document!",
         TEXT_PROC_TERM  = "Process has been terminated",
         TEXT_MAKETX_PROC= "Make tx process...",
+        TEXT_CONVDDS_PRO= "Convert dds process...",
         TEXT_MAKETX_NF  = "maketx.jsx was not found.",
+        TEXT_CONVDDS_NF = "makedds.jsx was not found.",
         TEXT_RMEXIF_PROC= "Remove EXIF process...",
         TEXT_EXIFUT_NF  = "exifutil.jsx was not found.",
         HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
@@ -144,6 +148,7 @@ const   TEXT_PATHS      = "path(s)",
         HELP_EXEC_VIS   = "Only visible groups would be save.",
         HELP_EXEC_ALL   = "Save all layers.",
         HELP_MAKE_TX    = "Auto generate arnold tx format image.",
+        HELP_CONV_DDS   = "Convert DDS format after."
         HELP_RMEXIF     = "Remove EXIF information."
         HELP_HIDE_OUTSD = "Hide outside layers before.",
         HELP_COMPRESS   = "Compression image format.",
@@ -156,8 +161,7 @@ division();
 function division()
 {
     // If document is incorrect, terminate process.
-    if(!activeDocumentCheck())
-    {
+    if(!activeDocumentCheck()) {
         return false;
     }
     gSavePaths = getSavePathProc(); // Get all path(s) need to save.
@@ -247,12 +251,18 @@ function divisionDialog()
         }
         dlg.panelExtensionOptions.rbA.onClick = function() {
             gExtension = "tif"; gExtensionStore = gExtension; 
+            // Enable remove exif infomation function.
+            dlg.panelExifInformation.cbA.enabled = true
         };
         dlg.panelExtensionOptions.rbB.onClick = function() {
-            gExtension = "tga"; gExtensionStore = gExtension; 
+            gExtension = "tga"; gExtensionStore = gExtension;
+            // Disable remove exif infomation function.
+            dlg.panelExifInformation.cbA.enabled = false;
         };
         dlg.panelExtensionOptions.rbC.onClick = function() {
             gExtension = "jpg"; gExtensionStore = gExtension;
+            // Disable remove exif infomation function.
+            dlg.panelExifInformation.cbA.enabled = false;
         };
         gExtensionStore = gExtension;
     } else {
@@ -271,10 +281,10 @@ function divisionDialog()
         gAutoGenerateTx = !gAutoGenerateTx;
     };
     dlg.panelExtensionOptions.cbB = dlg.panelExtensionOptions.add(
-        "CheckBox", undefined, "DDS"
+        "CheckBox", undefined, TEXT_MAKEDDS
     );
     dlg.panelExtensionOptions.cbB.value = gConvertDds;
-    dlg.panelExtensionOptions.cbB.helpTip = TEXT_MAKEDDS;
+    dlg.panelExtensionOptions.cbB.helpTip = HELP_CONV_DDS;
     dlg.panelExtensionOptions.cbB.onClick = function() {
         gConvertDds = !gConvertDds;
     };
@@ -292,6 +302,10 @@ function divisionDialog()
     dlg.panelExifInformation.cbA.onClick = function() {
         gRemoveExif = !gRemoveExif;
     };
+    // Disable remove exif function if format is not tif
+    if (gExtension != "tif") {
+        dlg.panelExifInformation.cbA.enabled = false;
+    }
 
     // Panel resize image options.
     dlg.panelResizeOptions = dlg.add("panel", undefined, TEXT_RESIZE);
@@ -604,7 +618,7 @@ function divisionMainProc(is_output_all)
                 app.activeDocument = work_doc; //Setting work document active.
                 while(work_doc.height.value != resize_height)
                 {
-                    work_doc.resizeImage(resize_width, resize_height, gImagePixel, gResampleMethod);
+                    work_doc.resizeImage(resize_width, resize_height, gImagePixel, RESAMPLE_METHOD);
                 }
                 work_doc.close(SaveOptions.SAVECHANGES); // Close with save changes.
                 app.activeDocument = curr_doc; // Focus previous document.
@@ -684,9 +698,23 @@ function divisionMainProc(is_output_all)
         if (maketx_file.exists) {
             $.evalFile(maketx_file);
             maketx(saved_images);
-            rate.setInfo(MAKE_PROC);
+            rate.setInfo(TEXT_MAKETX_PROC);
         } else {
-            rate.setInfo(MAKETX_NF);
+            rate.setInfo(TEXT_MAKETX_NF);
+        }
+    }
+
+    // Make DDS
+    if (gConvertDds)
+    {
+        var makedds_module = "" + File($.fileName).path + "/makedds.jsx";
+        var makedds_file = new File(makedds_module);
+        if (makedds_file.exists) {
+            $.evalFile(makedds_file);
+            makedds(saved_images);
+            rate.setInfo(TEXT_CONVDDS_PRO);
+        } else {
+            rate.setInfo(TEXT_CONVDDS_NF);
         }
     }
 
@@ -701,20 +729,6 @@ function divisionMainProc(is_output_all)
             rate.setInfo(TEXT_RMEXIF_PROC);
         } else {
             rate.setInfo(TEXT_EXIFUT_NF);
-        }
-    }
-    
-    // Make DDS
-    if (gConvertDds)
-    {
-        var makedds_module = "" + File($.fileName).path + "/makedds.jsx";
-        var makedds_file = new File(makedds_module);
-        if (makedds_file.exists) {
-            $.evalFile(makedds_file);
-            makedds(saved_images);
-            rate.setInfo("Make dds");
-        } else {
-            rate.setInfo("...");
         }
     }
 

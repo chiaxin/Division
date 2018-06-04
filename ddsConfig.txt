@@ -1,6 +1,5 @@
 bin=texconv.exe
 arguments=-ft DDS -y
-default_format=-f BC7_UNORM_SRGB -bcquick -srgbi
+default_format=-f BC7_UNORM_SRGB -bcquick -srgbi -aw 0.0
 normal_map_format=-f BC5_UNORM
 normal_map_keyword=_no
-alpha=-aw 0.0
