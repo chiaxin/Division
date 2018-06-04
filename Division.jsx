@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.4.1
+//    Version : 1.5.0
 //
-//    Last update : 2018-04-05
+//    Last update : 2018-06-03
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -29,37 +29,37 @@
 //      + Adobe Photoshop CC 2017
 // ----------------------------------------------------------------------------
 //
-var COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
-var ALPHA_CHANNEL_KEEP      = false                 ; // The Alpha channel keep or not.
-var EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
-var SAVE_PATHS              = []                    ; // Get all path(s) need to save.
-var SAVE_PATH               = ""                    ; // Default save path.
-var UI_TITLE                = "Division by Chiaxin "; // Window title.
-var SCRIPT_VER              = "v1.4.1"              ; // Version.
-var ENDING_WAIT             = 240                   ; //
+const COLOR_PROFILE_EMBED     = false                 ; // The Color-profile embed or not.
+const ALPHA_CHANNEL_KEEP      = false                 ; // The Alpha channel keep or not.
+const EXTENSION_CASE          = Extension.LOWERCASE   ; // File extension is uppercase or lowercase? 
+const UI_TITLE                = "Division by Chiaxin "; // Window title.
+const SCRIPT_VER            = "v1.5.0"            ; // Version.
+const ENDING_WAIT             = 240                   ; //
 
 // Low Resolution
-var LOW_SUFFIX              = ".low"                ; // Low Resolution name suffix.
-var LOW_RATIO               = 4                     ; // How many ratio to reduce? 
+const LOW_SUFFIX              = ".low"                ; // Low Resolution name suffix.
+const LOW_RATIO               = 4                     ; // How many ratio to reduce? 
 
 // TIFF Format
-var TIFF_BYTE_ORDER         = ByteOrder.IBM         ; // TIFF format byte order.
-var TIFF_COMP_ENCODING      = TIFFEncoding.TIFFLZW  ; // TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
+const TIFF_BYTE_ORDER         = ByteOrder.IBM         ; // TIFF format byte order.
+const TIFF_COMP_ENCODING      = TIFFEncoding.TIFFLZW  ; // TIFFEncoding.TIFFZIP , TIFFEncoding.TIFFLZW.
 
 // JPEG Format
-var JPEG_FORMAT = FormatOptions.STANDARDBASELINE    ; // JPEG format.
-var JPEG_SAVE_QUALITY       = 12                    ; // JPEG compression quality.
-var JPEG_MATTE_TYPE         = MatteType.SEMIGRAY    ; // JPEG matte type.
+const JPEG_FORMAT = FormatOptions.STANDARDBASELINE    ; // JPEG format.
+const JPEG_SAVE_QUALITY       = 12                    ; // JPEG compression quality.
+const JPEG_MATTE_TYPE         = MatteType.SEMIGRAY    ; // JPEG matte type.
 
 // TGA Format
-var TGA_PER_PIXELS = TargaBitsPerPixels.TWENTYFOUR  ; // TGA format (24 bits).
+const TGA_PER_PIXELS = TargaBitsPerPixels.TWENTYFOUR  ; // TGA format (24 bits).
 
 // The log file would be pre-reading, If not exists, it will try to build a new file.
-var SCRIPT_NAME     = "Division.jsx"                        ; // The local script name.
-var LOG_NAME        = "DivisionLog.txt"                     ; // The log txt.
-var SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script folder.
+const SCRIPT_NAME     = "Division.jsx"                        ; // The local script name.
+const LOG_NAME        = "DivisionLog.txt"                     ; // The log txt.
+const SCRIPT_FOLDER   = $.fileName.replace(SCRIPT_NAME, "")   ; // The script folder.
 
 // Global variables
+var gSavePaths      = [];       // Get all path(s) need to save.
+var gDefaultSavePath= "";       // Default save path.
 var gImagePixel     = 72;       // Document's pixel. The default is 72.
 var gCompression    = true;     // Compression image option.
 var gGrayKeyword    = "";       // The keyword(s) define gray image.
@@ -76,76 +76,78 @@ var gExtensionStore = "tga";    //
 var gProcessBreak   = false;    //
 var gDisableOutside = false;    // When save, disable outside layer at first.
 var gAutoGenerateTx = false;    // Make tx image after texture saved.
+var gConvertDds     = false;    // Convert dds after texture saved.
 var gRemoveExif     = false;    // Remove exif information after texture saved.
 
 // GUI text info defined
-var TEXT_PATHS      = "path(s)",
-    TEXT_FORMAT     = "Format",
-    TEXT_COMPRESS   = "Compress",
-    TEXT_RESIZE     = "Resize",
-    TEXT_ORG_SIZE   = "Original",
-    TEXT_HALF_SIZE  = "Half",
-    TEXT_QUARTER_SIZE = "Quarter",
-    TEXT_WITH_LOW   = "Gen Low",
-    TEXT_BUILD_LOW  = "Building lowest resolution...",
-    TEXT_LOW_DONE   = "The lowest res image is done!",
-    TEXT_OVERLAPPING= "Overlapping",
-    TEXT_OVERRIDE   = "Override",
-    TEXT_IGNORE_EXISTS = "Ignore Exists",
-    TEXT_NEW_FILE   = "Saving a new image...",
-    TEXT_INTERVAL   = "Intervals",
-    TEXT_UNDERSCORE = "Underscore",
-    TEXT_MAKETX     = "Make tx",
-    TEXT_RMEXIF     = "Remove Exif",
-    TEXT_EXIF_INFO  = "Exif Information",
-    TEXT_DISABLE_OUTSIDE = "Hide Outsd",
-    TEXT_DOT        = "Dot",
-    TEXT_VERSION    = "Suffixes ----- Grayscale Keywords",
-    TEXT_EXECUTE    = "Executions",
-    TEXT_EXECUTE_VISIBLE = "Visible",
-    TEXT_EXECUTE_ALL = "All Groups",
-    TEXT_CANCEL     = "Cancel",
-    TEXT_ADVANCE    = "Advance",
-    TEXT_PROCESSING = "Processing...",
-    TEXT_SAME_AS    = "Same as this document",
-    TEXT_NO_LAYER   = "Error: This document haven't any layer-set.",
-    TEXT_START      = "Process start...",
-    TEXT_FILE_EXISTS = "File exists...Skip.",
-    TEXT_DO_OVERRIDE = "File exists...Overriding.",
-    TEXT_EMPTY_SKIP = "is empty...Skip",
-    TEXT_DO_RESIZE  = "Image Resize...",
-    TEXT_COMPLETED  = " image(s) saved",
-    TEXT_INVALID_NAME = " invalid, Ignore.",
-    TEXT_TIFF_ONLY  = "TIFF format only, Because file is not 8 bits",
-    TEXT_ANALYSIS   = "Grayscale Analysis...",
-    TEXT_DO_GRAY    = "Gray conversion is done!",
-    TEXT_SKIP_GRAY  = "Skip Gray",
-    TEXT_GRAY_INFO  = "image(s) Grayscale.",
-    TEXT_PARENT_START = "[ ",
-    TEXT_PARENT_END = " ] ",
-    TEXT_NO_ANY_VISIBLE = "Do \"Visible\" must have one group visible at least!",
-    TEXT_IS_NOT_PSD = "This document is not a PSD file!",
-    TEXT_NO_DOCUMENTS = "There have no any document!",
-    TEXT_PROC_TERM  = "Process has been terminated",
-    TEXT_MAKETX_PROC= "Make tx process...",
-    TEXT_MAKETX_NF  = "maketx.jsx was not found.",
-    TEXT_RMEXIF_PROC= "Remove EXIF process...",
-    TEXT_EXIFUT_NF  = "exifutil.jsx was not found.",
-    HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
-    HELP_EXTENSION  = "Image formats, TIF, TGA or JPG. Make tx is optional.",
-    HELP_RESIZE     = "Resize image after saving.",
-    HELP_OVERLAPPING= "Overlapping exists file or skip.",
-    HELP_INTERVAL   = "Specific interval symbol between main and group name.",
-    HELP_SUFFIXES   = "For the output images's suffix words.",
-    HELP_GRAYKEYWRD = "If keyword matched, It will convert grayscale after. sperate them by space.",
-    HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers.",
-    HELP_EXEC_VIS   = "Only visible groups would be save.",
-    HELP_EXEC_ALL   = "Save all layers.",
-    HELP_MAKE_TX    = "Auto generate arnold tx format image.",
-    HELP_RMEXIF     = "Remove EXIF information."
-    HELP_HIDE_OUTSD = "Hide outside layers before.",
-    HELP_COMPRESS   = "Compression image format.",
-    HELP_GEN_LOW    = "Auto generate a lowest version image additional.";
+const   TEXT_PATHS      = "path(s)",
+        TEXT_FORMAT     = "Format",
+        TEXT_COMPRESS   = "Compress",
+        TEXT_RESIZE     = "Resize",
+        TEXT_ORG_SIZE   = "Original",
+        TEXT_HALF_SIZE  = "Half",
+        TEXT_QUARTER_SIZE = "Quarter",
+        TEXT_WITH_LOW   = "Gen Low",
+        TEXT_BUILD_LOW  = "Building lowest resolution...",
+        TEXT_LOW_DONE   = "The lowest res image is done!",
+        TEXT_OVERLAPPING= "Overlapping",
+        TEXT_OVERRIDE   = "Override",
+        TEXT_IGNORE_EXISTS = "Ignore Exists",
+        TEXT_NEW_FILE   = "Saving a new image...",
+        TEXT_INTERVAL   = "Intervals",
+        TEXT_UNDERSCORE = "Underscore",
+        TEXT_MAKETX     = "TX",
+        TEXT_MAKEDDS    = "DDS",
+        TEXT_RMEXIF     = "Remove Exif",
+        TEXT_EXIF_INFO  = "Exif Information",
+        TEXT_DISABLE_OUTSIDE = "Hide Outsd",
+        TEXT_DOT        = "Dot",
+        TEXT_VERSION    = "Suffixes ----- Grayscale Keywords",
+        TEXT_EXECUTE    = "Executions",
+        TEXT_EXECUTE_VISIBLE = "Visible",
+        TEXT_EXECUTE_ALL = "All Groups",
+        TEXT_CANCEL     = "Cancel",
+        TEXT_ADVANCE    = "Advance",
+        TEXT_PROCESSING = "Processing...",
+        TEXT_SAME_AS    = "Same as this document",
+        TEXT_NO_LAYER   = "Error: This document haven't any layer-set.",
+        TEXT_START      = "Process start...",
+        TEXT_FILE_EXISTS = "File exists...Skip.",
+        TEXT_DO_OVERRIDE = "File exists...Overriding.",
+        TEXT_EMPTY_SKIP = "is empty...Skip",
+        TEXT_DO_RESIZE  = "Image Resize...",
+        TEXT_COMPLETED  = " image(s) saved",
+        TEXT_INVALID_NAME = " invalid, Ignore.",
+        TEXT_TIFF_ONLY  = "TIFF format only, Because file is not 8 bits",
+        TEXT_ANALYSIS   = "Grayscale Analysis...",
+        TEXT_DO_GRAY    = "Gray conversion is done!",
+        TEXT_SKIP_GRAY  = "Skip Gray",
+        TEXT_GRAY_INFO  = "image(s) Grayscale.",
+        TEXT_PARENT_START = "[ ",
+        TEXT_PARENT_END = " ] ",
+        TEXT_NO_ANY_VISIBLE = "Do \"Visible\" must have one group visible at least!",
+        TEXT_IS_NOT_PSD = "This document is not a PSD file!",
+        TEXT_NO_DOCUMENTS = "There have no any document!",
+        TEXT_PROC_TERM  = "Process has been terminated",
+        TEXT_MAKETX_PROC= "Make tx process...",
+        TEXT_MAKETX_NF  = "maketx.jsx was not found.",
+        TEXT_RMEXIF_PROC= "Remove EXIF process...",
+        TEXT_EXIFUT_NF  = "exifutil.jsx was not found.",
+        HELP_SAVE_PATH  = "Please choice a path of list you want to save.",
+        HELP_EXTENSION  = "Image formats, TIF, TGA or JPG. Make tx is optional.",
+        HELP_RESIZE     = "Resize image after saving.",
+        HELP_OVERLAPPING= "Overlapping exists file or skip.",
+        HELP_INTERVAL   = "Specific interval symbol between main and group name.",
+        HELP_SUFFIXES   = "For the output images's suffix words.",
+        HELP_GRAYKEYWRD = "If keyword matched, It will convert grayscale after. sperate them by space.",
+        HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers.",
+        HELP_EXEC_VIS   = "Only visible groups would be save.",
+        HELP_EXEC_ALL   = "Save all layers.",
+        HELP_MAKE_TX    = "Auto generate arnold tx format image.",
+        HELP_RMEXIF     = "Remove EXIF information."
+        HELP_HIDE_OUTSD = "Hide outside layers before.",
+        HELP_COMPRESS   = "Compression image format.",
+        HELP_GEN_LOW    = "Auto generate a lowest version image additional.";
 
 // Main process execute
 division();
@@ -158,12 +160,12 @@ function division()
     {
         return false;
     }
-    SAVE_PATHS = getSavePathProc(); // Get all path(s) need to save.
-    SAVE_PATH = SAVE_PATHS[0]; // Default save path.
+    gSavePaths = getSavePathProc(); // Get all path(s) need to save.
+    gDefaultSavePath = gSavePaths[0]; // Default save path.
     
     if(readingLog() === false) writeLog();
 
-    if(!SAVE_PATHS) return false; 
+    if(!gSavePaths) return false; 
 
     divisionDialog();
 }
@@ -191,21 +193,21 @@ function divisionDialog()
     dlg.panelSavePaths.orientation = "column";
     // If we not provide any path(s), It will assume we want to save to same path with document.
     // And if we provide multi path, it will show drop-down-list UI for choose.
-    if (SAVE_PATHS.length == 1 && SAVE_PATHS[0] == app.activeDocument.path.fsName) {
+    if (gSavePaths.length == 1 && gSavePaths[0] == app.activeDocument.path.fsName) {
         dlg.panelSavePaths.stA = dlg.panelSavePaths.add("StaticText", undefined);
         dlg.panelSavePaths.stA.text = TEXT_SAME_AS;
-        SAVE_PATH = SAVE_PATHS[0];
+        gDefaultSavePath = gSavePaths[0];
     } else {
         dlg.panelSavePaths.ddlA = dlg.panelSavePaths.add("DropDownList", undefined);
         dlg.panelSavePaths.ddlA.maximumSize = { width:250, height:24 };
-        for(var i = 0 ; i < SAVE_PATHS.length ; i++) {
-            dlg.panelSavePaths.ddlA.add("item", SAVE_PATHS[i]);
+        for(var i = 0 ; i < gSavePaths.length ; i++) {
+            dlg.panelSavePaths.ddlA.add("item", gSavePaths[i]);
         }
         dlg.panelSavePaths.text = i + " " + TEXT_PATHS;
         dlg.panelSavePaths.ddlA.helpTip = HELP_SAVE_PATH;
         dlg.panelSavePaths.ddlA.selection = 0;
         dlg.panelSavePaths.ddlA.onChange = function() {
-            SAVE_PATH = dlg.panelSavePaths.ddlA.selection.text;
+            gDefaultSavePath = dlg.panelSavePaths.ddlA.selection.text;
         };
     }
 
@@ -267,6 +269,14 @@ function divisionDialog()
     dlg.panelExtensionOptions.cbA.helpTip = HELP_MAKE_TX;
     dlg.panelExtensionOptions.cbA.onClick = function() {
         gAutoGenerateTx = !gAutoGenerateTx;
+    };
+    dlg.panelExtensionOptions.cbB = dlg.panelExtensionOptions.add(
+        "CheckBox", undefined, "DDS"
+    );
+    dlg.panelExtensionOptions.cbB.value = gConvertDds;
+    dlg.panelExtensionOptions.cbB.helpTip = TEXT_MAKEDDS;
+    dlg.panelExtensionOptions.cbB.onClick = function() {
+        gConvertDds = !gConvertDds;
     };
 
     //
@@ -556,7 +566,7 @@ function divisionMainProc(is_output_all)
 
         // Prepare file path
         rate.setInfo(TEXT_PARENT_START + secondary_str + TEXT_PARENT_END);
-        var full_export_name = SAVE_PATH + "/" + main_str + gIntervalSymbol 
+        var full_export_name = gDefaultSavePath + "/" + main_str + gIntervalSymbol 
                              + secondary_str + "." + gExtension;
         var img_file_fh = new File(full_export_name);
 
@@ -630,7 +640,7 @@ function divisionMainProc(is_output_all)
         if(gLaunchLow)
         {
             rate.setInfo(secondary_str + " -> " + TEXT_BUILD_LOW);
-            var low_res_file_name = SAVE_PATH + "/" + main_str + gIntervalSymbol + secondary_str
+            var low_res_file_name = gDefaultSavePath + "/" + main_str + gIntervalSymbol + secondary_str
                 + LOW_SUFFIX + "." + gExtension;
             var low_res_file = new File(low_res_file_name);
             var low_res_width = Math.floor(resize_width / LOW_RATIO);
@@ -691,6 +701,20 @@ function divisionMainProc(is_output_all)
             rate.setInfo(TEXT_RMEXIF_PROC);
         } else {
             rate.setInfo(TEXT_EXIFUT_NF);
+        }
+    }
+    
+    // Make DDS
+    if (gConvertDds)
+    {
+        var makedds_module = "" + File($.fileName).path + "/makedds.jsx";
+        var makedds_file = new File(makedds_module);
+        if (makedds_file.exists) {
+            $.evalFile(makedds_file);
+            makedds(saved_images);
+            rate.setInfo("Make dds");
+        } else {
+            rate.setInfo("...");
         }
     }
 
@@ -854,6 +878,13 @@ function readingLog()
                 gAutoGenerateTx = true;
             else
                 gAutoGenerateTx = false;
+            break;
+        case "makedds":
+            if (value == "true" || value == "1")
+                gConvertDds = true;
+            else
+                gConvertDds = false;
+            break;
         case "remove_exif":
             if (value == "true" || value == "1")
                 gRemoveExif = true;
@@ -885,6 +916,7 @@ function writeLog()
         log.writeln("resize_mode = " + gResizeMode);
         log.writeln("disable_outside = " + gDisableOutside);
         log.writeln("maketx = " + gAutoGenerateTx);
+        log.writeln("makedds = " + gConvertDds);
         log.writeln("remove_exif = " + gRemoveExif);
     } catch(e) {
         alert(e, UI_TITLE + SCRIPT_VER);

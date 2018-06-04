@@ -1,2 +1,10 @@
+# No including config file
 DivisionLog.txt
-.vscode/
+
+# No including starts with "." and "_"
+_*
+.*
+!_config.yml
+
+# No include .vscode folder
+.vscode
