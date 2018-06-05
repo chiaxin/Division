@@ -4,11 +4,11 @@ Extension Photoshop script can be save each group out.
 
 ## Version
 
-1.5.0
+### 1.5.0
 
 ![Division](./intro.png)
 
-## How to use
+## How To Use
 
 1. In Photoshop, File -> Scripts -> Browse
 2. Choice Division.jsx in folder, it would be launch interface
@@ -16,24 +16,29 @@ Extension Photoshop script can be save each group out.
 ## The Photoshop Groups
 
 Build several groups you want to export.</br>
-The final output name is \<psd-name>\<interval-char>\<group-name>\<suffix>.\<extension>
+The final output name will be :  
 
-For example, we have four groups called "Refl", "Gls", "Bump" and "Color".
+| 1        | 2             | 3          | 4      | 5   | 6         |
+| -------- | ------------- | ---------- | ------ | --- |---------- |
+| PSD Name | Interval char | Group Name | Suffix |  .  | Extension |
+
+For example, we have 4 groups that named "Refl", "Gls", "Bump" and "Color".
 
 ![groups](./docs/groups.png)
 
-## The Save Path
+## Specifies Save Path
 
-You can specific path use "text" layer.  
+You can specifies path use "text" layer.  
 The text layer regradness visible or level.  
 It help script known where the directory you want to save.  
-If no path found, It will be same as this psd's directory.
+If no path found, It will be same as this PSD's directory.
 
 ![save-path](./docs/savepath.png)
 
 ## Save Formats
 
-Division have three format can be output - tif, tga and jpg.
+Division have 3 formats can be output - tif, tga and jpg.  
+But tif only if the PSD color depth is not 8 bits.
 
 ## Dependencies
 
@@ -47,7 +52,7 @@ Division have 3 features need following dependencies.
   
 ## Make tx Function
 
-Make tx is a new feature starts from 1.3.</br>
+Make tx is a new feature starts from 1.3.  
 If set, Division will do maketx application after saved.
 
 _txConfig.txt_ is make tx configuration.
@@ -72,10 +77,9 @@ _ddsConfig.txt_ is convert dds configuration.
 
 + bin=texconv.exe
 + arguments=-f DDS -bcquick -y
-+ input=-srgbi
-+ default=-f BC7_UNORM_SRGB
-+ normal=-f BC5_SNORM
-+ alpha=-aw 0.0
++ default_format=-f BC7_UNORM_SRGB -srgbi -aw 0.0
++ normal_format=-f BC5_UNORM
++ normal_format_keyword=_no
 
 ## Remove EXIF Function
 
@@ -101,30 +105,37 @@ else if ignore exists is set, it will skip any exists.
 
 You can choice the "_" or "." between \<psd-name> and \<group-name>  
 For example, you have a psd called myImages.psd and 2 groups called dif, bmp,  
-If you select "Underscore", it will output two images called ***myImages_dif*** and ***myImages_bmp***.  
-Or you select "Dot", it will output two images called ***myImages.dif*** and ***myImages.bmp***.
+If you select "Underscore", it will output two images called :
+
++ `myImages_dif`
++ `myImages_bmp`  
+
+Or you select "Dot", it will output two images called : 
+
++ `myImages.dif`
++ `myImages.bmp`
 
 ## Suffixes
 
 You can specifc the suffix.  
-For example, you fill suffix word ***".v1"***,  
-It will output images called ***myImages.dif.v1***.  
+For example, you fill suffix word as ".v1,  
+It will output images called `myImages.dif.v1`.  
 And if you want no any suffix, just blank it.
 
 ## Grayscale Keywords
 
 You can specific the keyword for auto convert image to grayscale,  
 Sperate words by space. 
-For example, you want the _Bump_, _Gls_, _Refl_ group to grayscale,  
+For example, you want the _Bump_, _Gls_, _Refl_ to grayscale,  
 Fill `Bump Gls Refl` into that area, It will convert them after saved.
 
 ## Advance Options
 
 + Hide Outsd (Hide outside) if set, 
-  it will hide all layers in the world before saving.
-+ Compress if set, it will make compression to image.
+  it will hide all layers in the world before saving
++ Compress if set, it will make compression to image
 + Gen low (Generate low resolution) if set,
-  it will generate a quarter image and suffix ***.low***.
+  it will generate a quarter image and suffix `.low`
 
 ## Execute
 
@@ -135,7 +146,7 @@ Fill `Bump Gls Refl` into that area, It will convert them after saved.
 ## Limit
 
 + The Photoshop file need saved before.
-+ The group must has a layer(not group) at least, otherwise it would be ignored.
++ The group must has one layer(not group) at least, otherwise it would be ignored.
 + If color depth is not 8 bits, Just TIFF format can be export only.
 
 ## Photoshop Support
