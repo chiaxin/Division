@@ -13,9 +13,9 @@
 //
 //    Create date : Sep, 17, 2014 (First build)
 //
-//    Version : 1.5.0
+//    Version : 1.5.1
 //
-//    Last update : 2018-06-03
+//    Last update : 2019-06-17
 //
 //    Test and Debug Platform : 
 //    + OS 
@@ -147,7 +147,7 @@ const   TEXT_PATHS      = "path(s)",
         HELP_COMMAND    = "Visible : Only visible group would be save, All-Layers : Save all layers.",
         HELP_EXEC_VIS   = "Only visible groups would be save.",
         HELP_EXEC_ALL   = "Save all layers.",
-        HELP_MAKE_TX    = "Auto generate arnold tx format image.",
+        HELP_MAKE_TX    = "Auto generate tx format image.",
         HELP_CONV_DDS   = "Convert DDS format after."
         HELP_RMEXIF     = "Remove EXIF information."
         HELP_HIDE_OUTSD = "Hide outside layers before.",
@@ -827,8 +827,8 @@ function getSavePathProc()
 
 function readingLog()
 {
-    var log = new File(SCRIPT_FOLDER+LOG_NAME);
-    if(!log.exists) return false;
+    var log = new File(SCRIPT_FOLDER + "/" + LOG_NAME);
+    if(!log.exists) return false; 
     var contents = "";
     var value = "";
     log.open("r");
@@ -914,7 +914,7 @@ function readingLog()
 
 function writeLog()
 {
-    var log = new File(SCRIPT_FOLDER + LOG_NAME);
+    var log = new File(SCRIPT_FOLDER + "/" + LOG_NAME);
     var stat = true;
     try {
         log.open('w');

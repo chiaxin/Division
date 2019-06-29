@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [1.5.1] : 2019-06-17
+
++ In the past version, the log written in the wrong directory, I fixed it.
+
 ## [1.5.0] : 2018-06-03
 
 + Add new feature - convert DDS format.
@@ -22,7 +26,7 @@ All notable changes to this project will be documented in this file.
 + Add new feature : Disable outside layers before save.
 + The resize mode could be store.
 + Fix a problem that if the document is not a psd file, report error.
-+ Make reside mode can be store.
++ Make resize mode can be store.
 + Code refactoring.
 
 ## [1.1.3] : 2016-05-29
